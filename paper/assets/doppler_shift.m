@@ -16,25 +16,29 @@ theta = acos(r .* sin(gamma) ./ s);
 
  
 f_c = 1000000; % carrier frequency in Hz
-f_d = V * f_c * cos(theta) ./ c; % Doppler shift in Hz
+f_d = V * f_c * cos(theta) ./ c; % Doppler shift in microseconds/s
 
-
+figure;
 plot(t,s, 'LineWidth', 1.5, 'Color', 'black');
 xlabel('time (s)', 'Interpreter','latex');
 ylabel('distance from ground station (km)', 'Interpreter','latex');
 set(gca, 'FontName','Latin Modern Math');
 saveas(gcf, 'distance.png');
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+% hold;
+% plot(t, (f_d).*c.*t.*10^(-6)./1.35 + 500, 'LineWidth', 1.5, 'Color', 'red');
 
 figure;
 plot(t, f_d, 'LineWidth', 1.5, 'Color', 'black');
 xlabel('time (s)', 'Interpreter','latex');
-ylabel('Doppler shift (Hz)', 'Interpreter','latex');
+ylabel('Doppler shift ($\mu00$s/s)', 'Interpreter','latex');
 set(gca, 'FontName','Latin Modern Math');
 saveas(gcf, 'doppler_shift.png');
 
+figure;
 dfdt = gradient(f_d(:)) ./ gradient(t(:));
 plot(t, dfdt, 'LineWidth', 1.5, 'Color', 'black');
 xlabel('time (s)', 'Interpreter','latex');
-ylabel('Doppler shift rate (Hz/s)', 'Interpreter','latex');
+ylabel('Doppler shift rate ($\mu$s/s$^2$)', 'Interpreter','latex');
 set(gca, 'FontName','Latin Modern Math');
 saveas(gcf, 'doppler_shift_rate.png');
