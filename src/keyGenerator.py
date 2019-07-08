@@ -395,9 +395,11 @@ class KeyGenerator:
         t1 = self.convertStamp(fAlice.readline())
         t2 = self.convertStamp(fBob.readline())
 
+        print('type(t1[0])', type(t1[0]))
+
         fAlice.close()
         fBob.close()
-        
+
         self.t0 = min([t1[0],t2[0]])
 
     def getDataForTimeInterval(self, f, stampArray, bases, intervalTime, startTime):
