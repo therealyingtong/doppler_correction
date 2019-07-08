@@ -28,8 +28,8 @@ class KeyGenerator:
     
     def setStartTime(self):
         self.T0 = time.time()
+
     def convertStamp(self, stamp):
-        
         if stamp == '':
             return [-1, -1]
         if self.inputMode == "bin64":
@@ -103,8 +103,6 @@ class KeyGenerator:
         
     def calcG2(self, minDiff = -10e-3, maxDiff = 10e-3, tau = 1, stable = 0):
         
-        
-        
         self.tau = tau
         timer = time.time()
         
@@ -112,16 +110,11 @@ class KeyGenerator:
             minDiff=2e-9*(self.offsetInt - stable)
             maxDiff = 2e-9*(self.offsetInt + stable)
             
-        
         self.tArray = numpy.linspace(minDiff, maxDiff,(int((maxDiff-minDiff)/(tau*2e-9))))
         self.g2 = numpy.zeros(int((maxDiff-minDiff)/(tau*2e-9)))
-
-        
-
-
+       
         indexStart = 0
         for i in range(0, int(len(self.timeStampAlice))):    
-
 
             for j in range(indexStart,int(len(self.timeStampBob))):
 
@@ -143,11 +136,8 @@ class KeyGenerator:
 
         print("g2 calculated in " + str(time.time()-timer) + "s!")
         
-
             
     def calcG2Shift(self, tau = 10000):
-        
-        
         
         self.tau = tau
         timer = time.time()
@@ -170,7 +160,6 @@ class KeyGenerator:
             #plt.plot(c)
             plt.show()
             return shift
-           
             
         def timebin(arr,t):
             
@@ -199,13 +188,9 @@ class KeyGenerator:
                     
             return [arr1, arr2]
         
-        
-       
-        
         bob = timebin(self.timeStampBob, self.tau)
         alice = timebin(self.timeStampAlice, self.tau)
 
-        
         [alice, bob] = pad(alice, bob)
         
         shift = compute_shift(alice, bob)
@@ -222,9 +207,7 @@ class KeyGenerator:
         self.offsetInt = int(self.offset/(self.tau*2e-9))
 
     def basisReconciliation(self):
-        
-        
-        
+
         self.timeStampBob = list(numpy.array(self.timeStampBob)-self.offsetInt)
         
         
@@ -270,19 +253,15 @@ class KeyGenerator:
             
             for i in range(len(self.basisAlice)):
                 if int(self.basisAlice[i]/2) == int(self.basisBob[i]/2):
-                    
                         
                         basisAlice.append(self.basisAlice[i])
                         basisBob.append(self.basisBob[i])
-                        
 
         self.basisBob = basisBob  
         self.basisAlice = basisAlice                
                 
         self.SK = len(self.basisAlice) # sifted key
                
-
-
     def errorEstimation(self):
         
         if len(self.basisAlice) == 0:
@@ -295,7 +274,6 @@ class KeyGenerator:
                     
                     qberCounter+=1
 
-                    
             return qberCounter/len(self.basisAlice)
         
     def determineQBER(self):
@@ -304,9 +282,9 @@ class KeyGenerator:
     def bitExtraction(self):
         
         for i in range(len(self.basisAlice)):
-            self.basisAlice[i] = self.basisAlice[i]%2;
+            self.basisAlice[i] = self.basisAlice[i]%2
         for i in range(len(self.basisBob)):
-            self.basisBob[i] = self.basisBob[i]%2;
+            self.basisBob[i] = self.basisBob[i]%2
         
     def errorCorrection(self): # https://apps.dtic.mil/dtic/tr/fulltext/u2/a557404.pdf
         
@@ -359,11 +337,8 @@ class KeyGenerator:
                     if j == blocks-1:
                         end = -1
                         
-                        
                     a = self.basisAlice[start:end]
                     b = self.basisBob[start:end]
-                    
-    
                     
                     [self.basisAlice[start:end],self.basisBob[start:end],errors] = cascade(a,b)
                     self.errors +=errors
@@ -372,7 +347,6 @@ class KeyGenerator:
             
             self.s += B+self.errors*numpy.ceil(numpy.log2(0.73/e)  )
                     
-
         self.correctedKey = len(self.basisAlice)
         
         
@@ -422,14 +396,11 @@ class KeyGenerator:
         fAlice = open(self.filenameAlice, 'r')
         fBob = open(self.filenameBob, 'r')
         
-       
-        
         self.timeStampAlice = []
         self.basisAlice = []
         
         self.timeStampBob = []
         self.basisBob = []
-                
         
         counter = 0
         
@@ -443,7 +414,6 @@ class KeyGenerator:
             
         fAlice.close()
         fBob.close()
-        
         
         
     def plotG2(self):
@@ -478,18 +448,22 @@ if __name__ == "__main__":
     k.setStartTime()
     k.determineStart()
     k.stampPreparation()
+    print('len(k.timeStampAlice)', len(k.timeStampAlice))
+    print('k.timeStampAlice', k.timeStampAlice[0:100])
+    print('k.basisAlice', k.basisAlice[0:100])
+
     k.calcG2Shift(10000)
     k.calcG2(stable = 10000)
     k.plotG2()
     k.findOffset()
 
-    k.calcLinkParameters()
-    k.findOffset()
-    k.basisReconciliation()
-    k.bitExtraction()
-    k.determineQBER()
-    k.errorCorrection()
-    k.privacyAmplification()
+    # k.calcLinkParameters()
+    # k.findOffset()
+    # k.basisReconciliation()
+    # k.bitExtraction()
+    # k.determineQBER()
+    # k.errorCorrection()
+    # k.privacyAmplification()
     
-    k.printResults()
+    # k.printResults()
     

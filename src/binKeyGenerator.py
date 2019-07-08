@@ -1,11 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Apr  7 16:09:57 2019
-
-@author: alloh
-"""
-
 #import dataGenerator
+import helper
 import numpy as np
 import time
 from scipy.fftpack import fft, ifft, fftshift
@@ -26,148 +20,20 @@ class KeyGenerator:
         self.margin = margin
         self.inputMode = inputMode
 
+    def determineStart(self):
+        self.t0 = min(self.timeStampAlice.tolist() + self.timeStampBob.tolist())
+        print('self.t0', self.t0)
+        self.timeStampAlice = self.timeStampAlice - self.t0
+        self.timeStampBob = self.timeStampBob - self.t0
+
     def parseStamp(self, filename):
-        if self.inputMode == '-X':
-            openedFile = open(filename, 'rb')
-            stamp = np.fromfile(file=openedFile, dtype='<u4').reshape(-1, 2)
-            return stamp
-        else:
-            openedFile = open(filename, 'r')
-            stamp = openedFile.readline()
-            return stamp
-    
-    def setStartTime(self):
-        self.T0 = time.time()
+        openedFile = open(filename, 'rb')
+        stamp = np.fromfile(file=openedFile, dtype='<u4').reshape(-1, 2)
+        timeStamp = ((np.uint64(stamp[:, 0]) << 17) + (stamp[:, 1] >> 15)) / 8. # time in nanoseconds.
+        basis = stamp[:, 1] & 0xf
+        return timeStamp, basis
 
-    def convertStamp(self, stamp):
-        
-        if stamp == '':
-            return [-1, -1]
-
-        if self.inputMode == "-X":
-            # cast to uint64!!!
-            t = ((np.uint64(stamp[:, 0]) << 17) + (stamp[:, 1] >> 15)) / 8. # time in nanoseconds.
-            p = stamp[:, 1] & 0xf
-            return [t.tolist(), p.tolist()]
-
-        if self.inputMode == "bin64":
-            timeStamp = (int(stamp[0:57],2)-self.t0)
-            basis =  int(np.log2(int(stamp[-5:-1],2)))
-            return [timeStamp, basis]
-    
-        elif self.inputMode == "hex1":
-            timeStamp = bin(int(stamp,16))[2:]
-            timeStamp = (64-len(timeStamp))*'0' + timeStamp            timeStamp = (64-len(timeStamp))*'0' + timeStamp
-
-            timeStamp = timeStamp[:-19]
-            timeStamp = int(timeStamp,2) - self.t0
-            
-            basis =  int(np.log2(int(stamp[-2],16)))
-            return [timeStamp, basis]
-    
-    def swapAD(self, a, d):
-        for i in range(len(self.basisBob)):
-            if self.basisBob[i] == a:
-                self.basisBob[i] = d
-                continue
-            if self.basisBob[i] == d:
-                self.basisBob[i] = a
-                
-    def setChannels(self, HDVA1 = [0,1,2,3], HDVA2= [0,1,2,3]):
-        self.HDVAAlice = HDVA1
-        self.HDVABob = HDVA2
-        
-        for i in range(len(self.basisAlice)):
-            for j in range(4):
-                if self.basisAlice[i] == HDVA1[j]:
-                    self.basisAlice[i] = j
-                    
-        for i in range(len(self.basisBob)):
-            for j in range(4):
-                
-                if self.basisBob[i] == HDVA2[j]:
-                    self.basisBob[i] = j
-                    
-    def ignoreBasis(self, b):
-        for i in range(len(self.basisAlice)):
-            for j in range(len(b)):
-                if self.basisAlice[i] == b[j]:
-                    self.basisAlice[i] = -1
-                    self.timeStampAlice[i]= -1
-                    
-        for i in range(len(self.basisBob)):
-            for j in range(len(b)):
-                if self.basisBob[i] == b[j]:
-                    self.basisBob[i] = -1
-                    self.timeStampBob[i] = -1
-
-        self.basisAlice = list(filter(lambda a: a != -1, self.basisAlice))
-        self.basisBob = list(filter(lambda a: a != -1, self.basisBob))
-        self.timeStampAlice = list(filter(lambda a: a != -1, self.timeStampAlice))
-        self.timeStampBob = list(filter(lambda a: a != -1, self.timeStampBob))
-    
-    def calcLinkParameters(self):
-        
-        self.S1 = len(self.timeStampAlice)
-        self.S2 = len(self.timeStampBob)
-        
-        
-        
-    def calcBalance(self):
-        self.balance = [0,0,0,0]
-        for i in self.basisAlice:
-            self.balance[int(i)] += 1
-        #for i in self.balance:
-        #    i /= sum(self.balance)
-        
-    def calcG2(self, minDiff = -10e-3, maxDiff = 10e-3, tau = 1, stable = 0):
-        
-        
-        
-        self.tau = tau
-        timer = time.time()
-        
-        if stable != 0: # maximal allowed drift within some time interval 
-            minDiff=2e-9*(self.offsetInt - stable)
-            maxDiff = 2e-9*(self.offsetInt + stable)
-            
-        
-        self.tArray = np.linspace(minDiff, maxDiff,(int((maxDiff-minDiff)/(tau*2e-9))))
-        self.g2 = np.zeros(int((maxDiff-minDiff)/(tau*2e-9)))
-
-        
-
-
-        indexStart = 0
-        for i in range(0, int(len(self.timeStampAlice))):    
-
-
-            for j in range(indexStart,int(len(self.timeStampBob))):
-
-                if self.timeStampBob[j] - self.timeStampAlice[i]  <= minDiff/(2e-9):
-                    indexStart = j               
-                    continue
-                
-                if self.timeStampBob[j] - self.timeStampAlice[i]  >= maxDiff/(2e-9):
-                    break
-                
-                #if max(self.g2) > 5*np.mean(self.g2):
-                 #   break
-                
-                try:
-                    self.g2[ int((self.timeStampBob[j] - self.timeStampAlice[i]) - minDiff/(2e-9))] +=1
-                except IndexError:
-                    pass
-            #i+=1
-
-        print("g2 calculated in " + str(time.time()-timer) + "s!")
-        
-
-            
-    def calcG2Shift(self, tau = 10000):
-        
-        
-        
+    def calcG2Shift(self, tau):
         self.tau = tau
         timer = time.time()
         
@@ -189,43 +55,21 @@ class KeyGenerator:
             #plt.plot(c)
             plt.show()
             return shift
-           
-            
-        def timebin(arr,t):
-            
-            counter =0
-            binnedArray = [0]
+        
+        bob = helper.timebin(self.timeStampBob, self.tau)
+        alice = helper.timebin(self.timeStampAlice, self.tau)
+        
+        [alice, bob] = helper.pad(alice, bob)
+        print('len(alice)', len(alice), max(alice), sum(alice))
+        print('len(bob)', len(bob), max(bob), sum(bob))
 
-            i = 0
-            while i < (len(arr)):
-                if arr[i]>=counter*t:
-                    counter += 1
-                    binnedArray.append(0)
-                    continue
-                i+=1
-                binnedArray[-1]+=1
-            
-            return list(np.array(binnedArray))
-        
-        def pad(arr1, arr2):
-            
-            if len(arr1)> len(arr2):
-                for i in range(len(arr1)-len(arr2)):
-                    arr2.append(0)
-            else:
-                for i in range(len(arr2)-len(arr1)):
-                    arr1.append(0)
-                    
-            return [arr1, arr2]
-        
-        
-       
-        
-        bob = timebin(self.timeStampBob, self.tau)
-        alice = timebin(self.timeStampAlice, self.tau)
+        def zero_to_nan(values):
+            """Replace every 0 with 'nan' and return a copy."""
+            return [float('nan') if x==0 else x for x in values]
 
-        
-        [alice, bob] = pad(alice, bob)
+        # plt.plot(alice)
+        # plt.plot(zero_to_nan(alice))
+        plt.plot(bob)
         
         shift = compute_shift(alice, bob)
         
@@ -235,231 +79,40 @@ class KeyGenerator:
         print("Shift:    " + str(self.offset))
         print("Shift calculated in " + str(time.time()-timer) + "s!")    
    
-    
-    def findOffset(self):
-        self.offset = self.tArray[np.argmax(self.g2)]
-        self.offsetInt = int(self.offset/(self.tau*2e-9))
-
-    def basisReconciliation(self):
+    def calcG2(self, minDiff = -10e-3, maxDiff = 10e-3, tau = 1, stable = 0):
         
+        self.tau = tau
+        timer = time.time()
         
+        if stable != 0: # maximal allowed drift within some time interval 
+            minDiff=2e-9*(self.offsetInt - stable)
+            maxDiff = 2e-9*(self.offsetInt + stable)
         
-        self.timeStampBob = list(np.array(self.timeStampBob)-self.offsetInt)
-        
-        
-        mini = min([len(self.timeStampAlice), len(self.timeStampBob)])
-        timeStampAlice = np.zeros(int(0.35*mini))
-        timeStampBob = np.zeros(int(0.35*mini))
-        basisAlice = np.zeros(int(0.35*mini))
-        basisBob = np.zeros(int(0.35*mini))
-     
+        self.tArray = np.linspace(minDiff, maxDiff,(int((maxDiff-minDiff)/(tau*2e-9))))
+        self.g2 = np.zeros(int((maxDiff-minDiff)/(tau*2e-9)))
+       
         indexStart = 0
-        counter = 0
-        t = time.time()
-        for i in range(len(self.timeStampAlice)):    
-            for j in range(indexStart,len(self.timeStampBob)):
-                
-                if self.timeStampBob[j] < self.timeStampAlice[i]-2*self.tau:
-                    indexStart = j
+        for i in range(0, int(len(self.timeStampAlice))):    
+
+            for j in range(indexStart,int(len(self.timeStampBob))):
+
+                if self.timeStampBob[j] - self.timeStampAlice[i]  <= minDiff/(2e-9):
+                    indexStart = j               
                     continue
-                if int(abs(self.timeStampBob[j] - self.timeStampAlice[i])) < self.tau:
-                    
-                    timeStampAlice[counter] = self.timeStampAlice[i]
-                    basisAlice[counter]=self.basisAlice[i]
-                    timeStampBob[counter]= self.timeStampBob[j]
-                    basisBob[counter]=self.basisBob[j]
-                    counter +=1
-                if self.timeStampBob[j] > self.timeStampAlice[i]:    
+                
+                if self.timeStampBob[j] - self.timeStampAlice[i]  >= maxDiff/(2e-9):
                     break
-        
-        #[a,b,c,d] = reconcile.reconcile(self.timeStampAlice, self.timeStampBob, self.basisAlice, self.basisBob, self.tau)
-        #print(len(a))
-        self.timeStampBob = list(timeStampBob)[0:np.argmax(timeStampAlice)+1]
-        self.timeStampAlice = list(timeStampAlice)[0:np.argmax(timeStampAlice)+1]
-        self.basisAlice = list(basisAlice)[0:np.argmax(timeStampAlice)+1]
-        self.basisBob = list(basisBob)[0:np.argmax(timeStampAlice)+1]
-        basisAlice = []
-        basisBob = []
-        #print("Coincidence rate:   " + str(len(self.basisAlice)))
-        self.C = len(self.basisAlice)
-        self.calcBalance()
-        print("basis reconciled in  " + str(time.time()-t) + "s!")         
-        
-        if len(self.basisAlice) == len(self.basisBob):
-            
-            for i in range(len(self.basisAlice)):
-                if int(self.basisAlice[i]/2) == int(self.basisBob[i]/2):
-                    
-                        
-                        basisAlice.append(self.basisAlice[i])
-                        basisBob.append(self.basisBob[i])
-                        
-
-        self.basisBob = basisBob  
-        self.basisAlice = basisAlice                
                 
-        self.SK = len(self.basisAlice) # sifted key
-               
-
-
-    def errorEstimation(self):
-        
-        if len(self.basisAlice) == 0:
-            return 1
-        
-        if len(self.basisAlice) == len(self.basisBob):
-            qberCounter = 0
-            for i in range(len(self.basisAlice)):
-                if self.basisAlice[i] != self.basisBob[i]:
-                    
-                    qberCounter+=1
-
-                    
-            return qberCounter/len(self.basisAlice)
-        
-    def determineQBER(self):
-        self.QBER = self.errorEstimation()
-            
-    def bitExtraction(self):
-        
-        for i in range(len(self.basisAlice)):
-            self.basisAlice[i] = self.basisAlice[i]%2;
-        for i in range(len(self.basisBob)):
-            self.basisBob[i] = self.basisBob[i]%2;
-        
-    def errorCorrection(self): # https://apps.dtic.mil/dtic/tr/fulltext/u2/a557404.pdf
-        
-        #print("Sifted key length:   " + str(len(self.basisAlice)))
-        print("Initial QBER:   " + str(self.QBER))
-        
-        def cascade(block1, block2, errors = 0):
-            
-                errors = errors
-            
-                if sum(block1)%2 != sum(block2)%2:
-                    
-                    if len(block1) >1:
-                        [block1[0:int(len(block1)/2)], block2[0:int(len(block2)/2)],s1] =cascade(block1[0:int(len(block1)/2)],block2[0:int(len(block2)/2)],errors)
-                        [block1[int(len(block1)/2):], block2[int(len(block2)/2):],s2] = cascade(block1[int(len(block1)/2):], block2[int(len(block2)/2):],errors)
-                        errors += s1+s2
-                    else:
-                        for i in range(len(block1)):
-                            block1[0] = block2[0]
-                            errors +=1
+                #if max(self.g2) > 5*numpy.mean(self.g2):
+                 #   break
                 
-                return [block1, block2, errors] 
+                try:
+                    self.g2[ int((self.timeStampBob[j] - self.timeStampAlice[i]) - minDiff/(2e-9))] +=1
+                except IndexError:
+                    pass
+            #i+=1
 
-        self.errors = 0
-        e = self.errorEstimation()
-        if e ==0:
-            return 0
-        
-        
-        self.s = 0
-        for i in range(4):
-            
-            c = list(zip(self.basisAlice, self.basisBob))
-            blocksize = int(0.73/e)
-            blocks = int(len(self.basisAlice)/blocksize)
-            B =1*blocks
-            random.shuffle(c)
-            self.basisAlice, self.basisBob = zip(*c)
-            self.basisAlice = list(self.basisAlice)
-            self.basisBob = list(self.basisBob)
-            blocks = int(len(self.basisAlice)/blocksize)
-            self.errors = 0
-            while blocks > 1:
-                blocks = int(len(self.basisAlice)/blocksize)
-                
-                for j in range(blocks):
-                    start = j*blocksize
-                    end = (j+1)*blocksize
-                    
-                    if j == blocks-1:
-                        end = -1
-                        
-                        
-                    a = self.basisAlice[start:end]
-                    b = self.basisBob[start:end]
-                    
-    
-                    
-                    [self.basisAlice[start:end],self.basisBob[start:end],errors] = cascade(a,b)
-                    self.errors +=errors
-                    
-                blocksize = 2*blocksize
-            
-            self.s += B+self.errors*np.ceil(np.log2(0.73/e)  )
-                    
-
-        self.correctedKey = len(self.basisAlice)
-        
-        
-    def privacyAmplification(self):
-        if self.basisAlice == self.basisBob:
-            
-            #T = toeplitz(np.random.randint(2, size=(len(self.basisAlice)),),np.random.randint(2, size=max([0,int(len(self.basisAlice)-self.s)]),))
-            T = toeplitz(np.random.randint(2, size=(len(self.basisAlice)),),np.random.randint(2, size=max([0,int(len(self.basisAlice)-self.s)]),))
-            self.basisAlice = np.matmul(np.transpose(T) ,np.transpose(np.matrix(self.basisAlice)))%2
-            self.basisBob = np.matmul(np.transpose(T),np.transpose(np.matrix(self.basisBob)))  %2
-            
-            self.final = len(self.basisAlice)
-        else:
-            self.final = 0
-    
-    def determineStart(self):
-        stampAlice = self.parseStamp(self.filenameAlice)
-        stampBob = self.parseStamp(self.filenameBob)
-
-        t1 = self.convertStamp(stampAlice)
-        t2 = self.convertStamp(stampBob)
-
-        # fAlice.close()
-        # fBob.close()
-        
-        print('t1[0]', type(t1[0]))
-
-        self.t0 = min([t1[0],t2[0]])
-
-    def getDataForTimeInterval(self, stamp, stampArray, bases, intervalTime, startTime):
-        
-        while True:
-            
-            if stamp[0] == -1:
-                return -1
-            stampArray.append(stamp[0])
-            bases.append(stamp[1])
-            
-            if stampArray[-1] > intervalTime:
-                
-                return 1
-    
-    def stampPreparation(self, intervalTime = 2e9):
-        
-        stampAlice = self.parseStamp(self.filenameAlice)
-        stampBob = self.parseStamp(self.filenameBob)
-        
-        self.timeStampAlice = []
-        self.basisAlice = []
-        
-        self.timeStampBob = []
-        self.basisBob = []
-                
-        
-        counter = 0
-        
-        while 1:
-        
-            end1 = self.getDataForTimeInterval(stampAlice, self.timeStampAlice, self.basisAlice, intervalTime, counter*intervalTime)
-            end2 = self.getDataForTimeInterval(stampBob, self.timeStampBob, self.basisBob, intervalTime, counter*intervalTime)
-           
-            if end1== -1 and end2 == -1:
-                break
-            
-        # fAlice.close()
-        # fBob.close()
-        
-        
+        print("g2 calculated in " + str(time.time()-timer) + "s!")
         
     def plotG2(self):
         
@@ -469,43 +122,30 @@ class KeyGenerator:
         plt.title("Offset = " + str(min(self.tArray)*1e3) + " ms")
         plt.grid(True)
         plt.show()
-        
-    def printResults(self):
-        print("##############   RESULTS   ###############")
-        print("Experiment time:    " + str(2e-9*int((max(self.timeStampAlice)-min(self.timeStampAlice)))))
-        #print("Evaluation time:    " + str(time.time()-self.T0))
-        print("S1:   " + str(self.S1))
-        print("S2:   " + str(self.S2))
-        print("Coinc:   " + str(self.C))
-        print("Eff 1:   " + str(self.C/self.S2))
-        print("Eff 2:   " + str(self.C/self.S1))
-        print("\n")
-        print("QBER:   " + str(self.QBER))
-        print("Sifted:   " + str(self.SK))
-        print("Corrected:    " + str(self.correctedKey))
-        print("Final:    " + str(self.final))
-        print("Final QBER:    " + str(self.errorEstimation()))
 
-        
 
 if __name__ == "__main__":
-    # k = KeyGenerator("../tableTopDemoData/beacon/20190416_10_kHZ_beaconTestAlice", "../tableTopDemoData/beacon/20190416_10_kHZ_beaconTestBob", 'hex1')
     k = KeyGenerator("../tableTopDemoData/atomicClock/ALICE_12Apr_19_3", "../tableTopDemoData/atomicClock/BOB_12Apr_19_3", '-X')
-    k.setStartTime()
+    k.timeStampAlice, k.basisAlice = k.parseStamp(k.filenameAlice)
+    k.timeStampBob, k.basisBob = k.parseStamp(k.filenameBob)
     k.determineStart()
-    k.stampPreparation()
-    k.calcG2Shift(10000)
-    k.calcG2(stable = 10000)
-    k.plotG2()
-    k.findOffset()
 
-    k.calcLinkParameters()
-    k.findOffset()
-    k.basisReconciliation()
-    k.bitExtraction()
-    k.determineQBER()
-    k.errorCorrection()
-    k.privacyAmplification()
-    
-    k.printResults()
-    
+    print('k.timeStampAlice', min(k.timeStampAlice), max(k.timeStampAlice))
+    print('k.timeStampBob', min(k.timeStampBob), max(k.timeStampBob))
+
+    timebinAlice = helper.timebin(k.timeStampAlice, 100000000)
+    timebinBob = helper.timebin(k.timeStampBob, 100000000)
+    f = plt.figure(1)
+    plt.plot(timebinAlice)
+    f.show()
+    g = plt.figure(2)
+    # plt.plot(timebinBob[int(len(timebinBob)/2):int(1.5*len(timebinBob)/2)])
+    plt.plot(timebinBob)
+    g.show()
+
+    plt.show()
+    # print('len(timebinBob)', len(timebinBob), max(timebinBob), sum(timebinBob))
+
+    # k.calcG2Shift(100000000)
+    # k.calcG2(stable = 10)
+    # k.plotG2()
