@@ -16,14 +16,12 @@ from scipy.linalg import toeplitz
 
 import pyximport; pyximport.install()
 
-
 class KeyGenerator:
     
-    def __init__(self, filenameAlice = [], filenameBob=[], inputMode = "bin64", margin = 32):
+    def __init__(self, filenameAlice = [], filenameBob=[], inputMode = "bin64"):
         self.filenameAlice=filenameAlice
         self.filenameBob=filenameBob
         self.t0 = 0
-        self.margin = margin
         self.inputMode = inputMode
     
     def setStartTime(self):
@@ -45,48 +43,7 @@ class KeyGenerator:
             
             basis =  int(numpy.log2(int(stamp[-2],16)))
             return [timeStamp, basis]
-    
-    def swapAD(self, a, d):
-        for i in range(len(self.basisBob)):
-            if self.basisBob[i] == a:
-                self.basisBob[i] = d
-                continue
-            if self.basisBob[i] == d:
-                self.basisBob[i] = a
-                
-    def setChannels(self, HDVA1 = [0,1,2,3], HDVA2= [0,1,2,3]):
-        self.HDVAAlice = HDVA1
-        self.HDVABob = HDVA2
-        
-        for i in range(len(self.basisAlice)):
-            for j in range(4):
-                if self.basisAlice[i] == HDVA1[j]:
-                    self.basisAlice[i] = j
                     
-        for i in range(len(self.basisBob)):
-            for j in range(4):
-                
-                if self.basisBob[i] == HDVA2[j]:
-                    self.basisBob[i] = j
-                    
-    def ignoreBasis(self, b):
-        for i in range(len(self.basisAlice)):
-            for j in range(len(b)):
-                if self.basisAlice[i] == b[j]:
-                    self.basisAlice[i] = -1
-                    self.timeStampAlice[i]= -1
-                    
-        for i in range(len(self.basisBob)):
-            for j in range(len(b)):
-                if self.basisBob[i] == b[j]:
-                    self.basisBob[i] = -1
-                    self.timeStampBob[i] = -1
-
-        self.basisAlice = list(filter(lambda a: a != -1, self.basisAlice))
-        self.basisBob = list(filter(lambda a: a != -1, self.basisBob))
-        self.timeStampAlice = list(filter(lambda a: a != -1, self.timeStampAlice))
-        self.timeStampBob = list(filter(lambda a: a != -1, self.timeStampBob))
-    
     def calcLinkParameters(self):
         
         self.S1 = len(self.timeStampAlice)
@@ -209,7 +166,6 @@ class KeyGenerator:
     def basisReconciliation(self):
 
         self.timeStampBob = list(numpy.array(self.timeStampBob)-self.offsetInt)
-        
         
         mini = min([len(self.timeStampAlice), len(self.timeStampBob)])
         timeStampAlice = numpy.zeros(int(0.35*mini))
