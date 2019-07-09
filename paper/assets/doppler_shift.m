@@ -29,7 +29,7 @@ saveas(gcf, 'distance.png');
 % plot(t, (f_d).*c.*t.*10^(-6)./1.35 + 500, 'LineWidth', 1.5, 'Color', 'red');
 
 figure;
-plot(t, f_d, 'LineWidth', 1.5, 'Color', 'black');
+plot(t, -f_d, 'LineWidth', 1.5, 'Color', 'black');
 xlabel('time (s)', 'Interpreter','latex');
 ylabel('Doppler shift ($\mu00$s/s)', 'Interpreter','latex');
 set(gca, 'FontName','Latin Modern Math');
