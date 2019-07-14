@@ -167,6 +167,7 @@ class KeyGenerator:
 
         self.timeStampBob = list(numpy.array(self.timeStampBob)-self.offsetInt)
         
+        
         mini = min([len(self.timeStampAlice), len(self.timeStampBob)])
         timeStampAlice = numpy.zeros(int(0.35*mini))
         timeStampBob = numpy.zeros(int(0.35*mini))
@@ -404,14 +405,21 @@ if __name__ == "__main__":
     k.setStartTime()
     k.determineStart()
     k.stampPreparation()
+    print('min(k.timeStampAlice)', min(k.timeStampAlice))
+    print('max(k.timeStampAlice)', max(k.timeStampAlice))
     print('len(k.timeStampAlice)', len(k.timeStampAlice))
-    print('k.timeStampAlice', k.timeStampAlice[0:100])
-    print('k.basisAlice', k.basisAlice[0:100])
 
-    k.calcG2Shift(10000)
-    k.calcG2(stable = 10000)
-    k.plotG2()
-    k.findOffset()
+    print('min(k.timeStampBob)', min(k.timeStampBob))
+    print('max(k.timeStampBob)', max(k.timeStampBob))
+    print('len(k.timeStampBob)', len(k.timeStampBob))
+
+    print('k.t0', k.t0)
+    plt.plot(k.timeStampAlice)
+    plt.show()
+    # k.calcG2Shift(10000)
+    # k.calcG2(stable = 10000)
+    # k.plotG2()
+    # k.findOffset()
 
     # k.calcLinkParameters()
     # k.findOffset()

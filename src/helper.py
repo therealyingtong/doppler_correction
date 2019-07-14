@@ -22,14 +22,35 @@ def timebin(arr,t):
     
     return list(np.array(binnedArray))
 
-def pad(arr1, arr2):
-    if len(arr1)> len(arr2):
-        for i in range(len(arr1)-len(arr2)):
-            arr2.append(0)
+def firstZeroIndex(arr):
+    for i in range(len(arr)):
+        print(arr[i])
+        if arr[i] == 0:
+            return i
+
+def sortArrLen(arr1, arr2):
+    # return arrays ordered in ascending order of array length
+    if len(arr1) > len(arr2):
+        return arr2, arr1
     else:
-        for i in range(len(arr2)-len(arr1)):
-            arr1.append(0)
-            
+        return arr1, arr2
+
+def findMinOfTwoArrays(arr1, arr2):
+    return min([min(arr1), min(arr2)])
+
+def pad(arr1, arr2):
+
+    diffLen = abs(len(arr1) - len(arr2))
+    pad = np.zeros(diffLen)
+
+    if len(arr1)> len(arr2):
+        arr1 = np.concatenate([arr1, np.zeros(len(arr1))])
+        arr2 = np.concatenate([arr2, np.zeros(len(arr2)), pad, pad])
+
+    else:
+        arr2 = np.concatenate([arr2, np.zeros(len(arr2))])
+        arr1 = np.concatenate([arr1, np.zeros(len(arr1)), pad, pad])
+
     return arr1, arr2
 
 def cross_correlation_using_fft(x, y):
@@ -46,7 +67,6 @@ def compute_shift(x, y):
     zero_index = int(len(x) / 2) - 1
     shift = zero_index - np.argmax(c)
     
-    print('shift',shift)
     # plt.plot(c)
     # plt.show()
 

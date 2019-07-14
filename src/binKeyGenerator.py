@@ -24,50 +24,80 @@ class KeyGenerator:
         openedFile = open(filename, 'rb')
         stamp = np.fromfile(file=openedFile, dtype='<u4').reshape(-1, 2)
         timeStamp = ((np.uint64(stamp[:, 0]) << 17) + (stamp[:, 1] >> 15)) / 8. # time in nanoseconds.
-        basis = stamp[:, 1] & 0xf
-        return timeStamp, basis
+        detector = stamp[:, 1] & 0xf
+        return timeStamp, detector
 
-    def processStamp(self):
-        self.timebinAlice = helper.timebin(self.timeStampAlice, 10000000)
-        self.timebinBob = helper.timebin(self.timeStampBob, 10000000)
-        self.timebinBob = self.timebinBob[0:int(60*len(self.timebinBob)/100)]
+    def processStamp(self, tau):
+
+        # manually remove anomalies in timeStampBob
+        # self.timeStampBob = self.timeStampBob[0: int( 8.2*len(self.timeStampBob)/14 )]
+
+        # self.interval = min([len(self.timeStampAlice), len(self.timeStampBob)])
+        # self.timeStampAlice = self.timeStampAlice[0:self.interval]
+        # self.timeStampBob = self.timeStampBob[0:self.interval]
+
+        minTime = helper.findMinOfTwoArrays(self.timeStampAlice, self.timeStampBob)
+        print('minTime', minTime)
+        self.timeStampAlice = self.timeStampAlice - minTime
+        print('self.timeStampAlice[0:10]', self.timeStampAlice[0:10])
+
+        self.timeStampBob = self.timeStampBob - minTime
+        print('self.timeStampBob[0:10]', self.timeStampBob[0:10])
+
+        # self.timeStampAlice, self.timeStampBob = helper.pad(self.timeStampAlice, self.timeStampBob)
+
+        self.timebinAlice = helper.timebin(self.timeStampAlice, tau)
+        self.timebinBob = helper.timebin(self.timeStampBob, tau)
 
         # trim leading and trailing zeros
         self.timebinAlice = np.trim_zeros(self.timebinAlice)
         self.timebinBob = np.trim_zeros(self.timebinBob) 
 
         # pad arrays to same size
-        self.timebinAlice, self.timebinBob = helper.pad(self.timebinAlice, k.timebinBob)
+        self.timebinAlice, self.timebinBob = helper.pad(self.timebinAlice, self.timebinBob)
 
-    def calcG2(self, minDiff = -10e-3, maxDiff = 10e-3, tau = 1, stable = 0):
+        self.timebinAlice = self.timebinAlice[10:]
+        self.timebinBob = self.timebinBob[10:]
+
+
+    def calcG2(self, tau = 1, stable = 0):
         
         self.tau = tau
         timer = time.time()
         
-        if stable != 0: # maximal allowed drift within some time interval 
-            minDiff=2e-9*(self.shift - stable)
-            maxDiff = 2e-9*(self.shift + stable)
+        # if stable != 0: # maximal allowed drift within some time interval 
+        minDiff= (-abs(self.offsetInt) - stable)/tau
+        maxDiff = (abs(self.offsetInt) + stable)/tau
         
-        self.tArray = np.linspace(minDiff, maxDiff,(int((maxDiff-minDiff)/(tau*2e-9))))
-        self.g2 = np.zeros(int((maxDiff-minDiff)/(tau*2e-9)))
-       
+        print('minDiff', minDiff, 'maxDiff', maxDiff)
+
+        self.tArray = np.linspace(minDiff, maxDiff, tau)
+        print('len(self.tArray)', len(self.tArray))
+        self.g2 = np.zeros(tau)
+
         indexStart = 0
-        for i in range(0, int(len(self.timebinAlice))):    
+        array1, array2 = helper.sortArrLen(self.timebinAlice, self.timebinBob)
+        # array1, array2 = helper.sortArrLen(self.timeStampAlice, self.timeStampBob)
 
-            for j in range(indexStart,int(len(self.timebinBob))):
+        for i in np.arange(0, len(array1)):    
 
-                if self.timebinBob[j] - self.timebinAlice[i]  <= minDiff/(2e-9):
+            for j in np.arange(indexStart, len(array2)):
+
+                if abs(array2[j] - array1[i])  <= abs(minDiff):
+                    # print('i', i, 'j', j, 'diff', array2[j] - array1[i], 'minDiff', minDiff)
                     indexStart = j               
                     continue
                 
-                if self.timebinBob[j] - self.timebinAlice[i]  >= maxDiff/(2e-9):
+                if abs(array2[j] - array1[i])  >= abs(maxDiff):
+                    # print('i', i, 'j', j, 'diff', array2[j] - array1[i], 'maxDiff', maxDiff)
                     break
                 
                 #if max(self.g2) > 5*numpy.mean(self.g2):
                  #   break
                 
                 try:
-                    self.g2[ int((self.timebinBob[j] - self.timebinAlice[i]) - minDiff/(2e-9))] +=1
+                    self.g2[ int((array2[j] - array1[i]) - minDiff)] +=1
+                    # print(self.g2[ int((array2[j] - array1[i]) - minDiff)])
                 except IndexError:
                     pass
             #i+=1
@@ -77,9 +107,10 @@ class KeyGenerator:
     def plotAlice(self):
         
         plt.plot(
-            self.timebinAlice, linestyle = 'None', 
-            color = 'None', marker = 'o' , 
-            markeredgecolor = 'k', markersize = 6
+            self.timebinAlice, 
+            # self.timeStampAlice,
+            marker = 'o' , 
+            markersize = 2
         )
         plt.xlabel("Timebins")
         plt.ylabel("Events")
@@ -88,9 +119,11 @@ class KeyGenerator:
 
     def plotBob(self):
         plt.plot(
-            k.timebinBob, linestyle = 'None', 
-            color = 'None', marker = 'o', 
-            markeredgecolor = 'k', markersize = 6
+            self.timebinBob, 
+            # self.timeStampBob,
+            # linestyle = 'None',
+            marker = 'o', 
+            markersize = 2
         )
         plt.xlabel("Timebins")
         plt.ylabel("Events")
@@ -98,23 +131,38 @@ class KeyGenerator:
 
     def plotG2(self):
         
-        plt.plot((self.tArray-min(self.tArray))*1e6,self.g2, '-sk', markersize = 5)
-        plt.xlabel("Delay (us)")
+        plt.plot((self.tArray-min(self.tArray)),self.g2, '-sk', markersize = 5)
+        plt.xlabel("Delay (ns)")
         plt.ylabel("Coincidence detections")
-        plt.title("Offset = " + str(min(self.tArray)*1e3) + " ms")
+        plt.title("Offset = " + str(min(self.tArray)) + "ns")
         plt.grid(True)
         plt.savefig("../paper/assets/g2.png", bbox_inches = 'tight')
 
 if __name__ == "__main__":
     k = KeyGenerator("../tableTopDemoData/atomicClock/ALICE_12Apr_19_3", "../tableTopDemoData/atomicClock/BOB_12Apr_19_3", '-X')
-    k.timeStampAlice, k.basisAlice = k.parseStamp(k.filenameAlice)
-    k.timeStampBob, k.basisBob = k.parseStamp(k.filenameBob)
+    timeStampAlice, detectorAlice = k.parseStamp(k.filenameAlice)
+    k.timeStampAlice = np.copy(timeStampAlice)
+    k.timeStampBob = np.copy(timeStampAlice)
+    k.timeStampBob = k.timeStampBob[700000:len(timeStampAlice)]
+    # k.timeStampBob, k.detectorBob = k.parseStamp(k.filenameBob)
+    tau = 10000000
 
-    print('k.timeStampAlice', min(k.timeStampAlice), max(k.timeStampAlice))
-    print('k.timeStampBob', min(k.timeStampBob), max(k.timeStampBob))
+    k.processStamp(tau = tau)
 
-    k.processStamp()
+    print('max(k.timeStampAlice)', max(k.timeStampAlice))
+    print('len(k.timeStampAlice)', len(k.timeStampAlice))
+
+    print('int(len(k.timeStampAlice))', int(len(k.timeStampAlice)))
+
+    print('min(k.timeStampBob)', min(k.timeStampBob))
+    print('max(k.timeStampBob)', max(k.timeStampBob))
+    print('int(len(k.timeStampBob))', int(len(k.timeStampBob)))
+
     k.shift = helper.compute_shift(k.timebinAlice, k.timebinBob)
+    print('shift',k.shift*tau, 'ns')
+
+    k.offset = k.shift * tau 
+    k.offsetInt = int(k.offset)
 
     f = plt.figure(1)
     k.plotAlice()
@@ -124,10 +172,10 @@ if __name__ == "__main__":
     k.plotBob()
     g.show()
 
-    k.calcG2(stable = 0)
+    k.calcG2(tau = tau)
 
     h = plt.figure(3)
     k.plotG2()
     h.show()
-    
+
     plt.show()
