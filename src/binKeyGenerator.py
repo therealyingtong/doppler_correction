@@ -30,7 +30,7 @@ class KeyGenerator:
     def processStamp(self, tau):
 
         # manually remove anomalies in timeStampBob
-        # self.timeStampBob = self.timeStampBob[0: int( 8.2*len(self.timeStampBob)/14 )]
+        self.timeStampBob = self.timeStampBob[0: int( 8.2*len(self.timeStampBob)/14 )]
 
         # self.interval = min([len(self.timeStampAlice), len(self.timeStampBob)])
         # self.timeStampAlice = self.timeStampAlice[0:self.interval]
@@ -44,8 +44,6 @@ class KeyGenerator:
         self.timeStampBob = self.timeStampBob - minTime
         print('self.timeStampBob[0:10]', self.timeStampBob[0:10])
 
-        # self.timeStampAlice, self.timeStampBob = helper.pad(self.timeStampAlice, self.timeStampBob)
-
         self.timebinAlice = helper.timebin(self.timeStampAlice, tau)
         self.timebinBob = helper.timebin(self.timeStampBob, tau)
 
@@ -54,55 +52,40 @@ class KeyGenerator:
         self.timebinBob = np.trim_zeros(self.timebinBob) 
 
         # pad arrays to same size
-        self.timebinAlice, self.timebinBob = helper.pad(self.timebinAlice, self.timebinBob)
+        self.timebinAlice, self.timebinBob = helper.padFFT(self.timebinAlice, self.timebinBob)
 
         self.timebinAlice = self.timebinAlice[10:]
         self.timebinBob = self.timebinBob[10:]
 
 
-    def calcG2(self, tau = 1, stable = 0):
-        
-        self.tau = tau
-        timer = time.time()
-        
-        # if stable != 0: # maximal allowed drift within some time interval 
-        minDiff= (-abs(self.offsetInt) - stable)/tau
-        maxDiff = (abs(self.offsetInt) + stable)/tau
-        
-        print('minDiff', minDiff, 'maxDiff', maxDiff)
+    def plotXcorr(self):
 
-        self.tArray = np.linspace(minDiff, maxDiff, tau)
-        print('len(self.tArray)', len(self.tArray))
-        self.g2 = np.zeros(tau)
+        print('starting plotXcorr')
 
-        indexStart = 0
         array1, array2 = helper.sortArrLen(self.timebinAlice, self.timebinBob)
+
+        # self.timeStampAlice, self.timeStampBob = helper.padXcorr(self.timeStampAlice, self.timeStampBob)
         # array1, array2 = helper.sortArrLen(self.timeStampAlice, self.timeStampBob)
 
-        for i in np.arange(0, len(array1)):    
+        # self.xcorr = np.correlate(array1, array2, 'full')
+        # print('xcorr', self.xcorr)
+        # np.save('xcorr', self.xcorr)
 
-            for j in np.arange(indexStart, len(array2)):
+        # plt.plot(self.xcorr)
 
-                if abs(array2[j] - array1[i])  <= abs(minDiff):
-                    # print('i', i, 'j', j, 'diff', array2[j] - array1[i], 'minDiff', minDiff)
-                    indexStart = j               
-                    continue
-                
-                if abs(array2[j] - array1[i])  >= abs(maxDiff):
-                    # print('i', i, 'j', j, 'diff', array2[j] - array1[i], 'maxDiff', maxDiff)
-                    break
-                
-                #if max(self.g2) > 5*numpy.mean(self.g2):
-                 #   break
-                
-                try:
-                    self.g2[ int((array2[j] - array1[i]) - minDiff)] +=1
-                    # print(self.g2[ int((array2[j] - array1[i]) - minDiff)])
-                except IndexError:
-                    pass
-            #i+=1
+        plt.xcorr(
+            array1, 
+            array2, 
+            usevlines=False, 
+            normed=False, 
+            )
+        plt.grid(True)
 
-        print("g2 calculated in " + str(time.time()-timer) + "s!")
+        plt.xlabel("Delay (" + str(self.tau) + "ns)")
+        plt.ylabel("Coincidence detections")
+        # plt.title("Offset = " + (np.argmax(self.xcorr) - len(array1))*self.tau + "ns")
+        plt.grid(True)
+        plt.savefig("../paper/assets/xcorr.png", bbox_inches = 'tight')
 
     def plotAlice(self):
         
@@ -110,7 +93,8 @@ class KeyGenerator:
             self.timebinAlice, 
             # self.timeStampAlice,
             marker = 'o' , 
-            markersize = 2
+            markersize = 2,
+            # linestyle = "None"
         )
         plt.xlabel("Timebins")
         plt.ylabel("Events")
@@ -121,48 +105,62 @@ class KeyGenerator:
         plt.plot(
             self.timebinBob, 
             # self.timeStampBob,
-            # linestyle = 'None',
             marker = 'o', 
-            markersize = 2
+            markersize = 2,
+            # linestyle = "None"
         )
         plt.xlabel("Timebins")
         plt.ylabel("Events")
         plt.savefig("../paper/assets/bob.png", bbox_inches = 'tight')
 
-    def plotG2(self):
-        
-        plt.plot((self.tArray-min(self.tArray)),self.g2, '-sk', markersize = 5)
+    def plotCC(self):
+        print('starting plotCC')
+        np.save('fourierXcorr', self.cc)
+        print('saved self.cc')
+        plt.plot(self.zero_index - np.linspace(0,len(self.cc), len(self.cc)), self.cc, '-sk', markersize = 5)
+        print('plotted plotCC')
         plt.xlabel("Delay (ns)")
         plt.ylabel("Coincidence detections")
-        plt.title("Offset = " + str(min(self.tArray)) + "ns")
-        plt.grid(True)
-        plt.savefig("../paper/assets/g2.png", bbox_inches = 'tight')
+        plt.title("Offset = " + str(
+            (self.zero_index - np.argmax(self.cc))) + "ns")
+        plt.annotate(str(self.shift), xy=(self.shift, 0.5 * 1e7))
+        # plt.grid(True)
+        plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
+
+    def plotCC_bin(self):
+        print('starting plotCC_bin')
+        np.save('fourierXcorr_bin', self.cc_bin)
+        print('saved self.cc_bin')
+        plt.plot(self.zero_index_bin - np.linspace(0,len(self.cc_bin), len(self.cc_bin)), self.cc_bin, '-sk', markersize = 5)
+        print('plotted plotCC_bin')
+        plt.xlabel("Delay (" + str(self.tau) + "ns)")
+        plt.ylabel("Coincidence detections")
+        plt.title("Offset = " + str(
+            (self.zero_index_bin - np.argmax(self.cc_bin)) * self.tau) + "ns")
+        plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0.5 * 1e7))
+        # plt.grid(True)
+        plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
+
+
 
 if __name__ == "__main__":
     k = KeyGenerator("../tableTopDemoData/atomicClock/ALICE_12Apr_19_3", "../tableTopDemoData/atomicClock/BOB_12Apr_19_3", '-X')
     timeStampAlice, detectorAlice = k.parseStamp(k.filenameAlice)
     k.timeStampAlice = np.copy(timeStampAlice)
-    k.timeStampBob = np.copy(timeStampAlice)
-    k.timeStampBob = k.timeStampBob[700000:len(timeStampAlice)]
-    # k.timeStampBob, k.detectorBob = k.parseStamp(k.filenameBob)
-    tau = 10000000
+    # k.timeStampBob = np.copy(timeStampAlice)
+    # k.timeStampBob = k.timeStampBob[700000:len(timeStampAlice)]
+    k.timeStampBob, k.detectorBob = k.parseStamp(k.filenameBob)
+    k.tau = 100000
 
-    k.processStamp(tau = tau)
+    k.processStamp(tau = k.tau)
 
+    print('min(k.timeStampAlice)', min(k.timeStampAlice))
     print('max(k.timeStampAlice)', max(k.timeStampAlice))
     print('len(k.timeStampAlice)', len(k.timeStampAlice))
-
-    print('int(len(k.timeStampAlice))', int(len(k.timeStampAlice)))
 
     print('min(k.timeStampBob)', min(k.timeStampBob))
     print('max(k.timeStampBob)', max(k.timeStampBob))
     print('int(len(k.timeStampBob))', int(len(k.timeStampBob)))
-
-    k.shift = helper.compute_shift(k.timebinAlice, k.timebinBob)
-    print('shift',k.shift*tau, 'ns')
-
-    k.offset = k.shift * tau 
-    k.offsetInt = int(k.offset)
 
     f = plt.figure(1)
     k.plotAlice()
@@ -172,10 +170,20 @@ if __name__ == "__main__":
     k.plotBob()
     g.show()
 
-    k.calcG2(tau = tau)
+    k.timeStampAlice, k.timeStampBob = helper.padFFT(k.timeStampAlice, k.timeStampBob)
+
+    k.zero_index_bin, k.shift_bin, k.cc_bin = helper.compute_shift(k.timebinAlice, k.timebinBob)
+    k.zero_index, k.shift, k.cc = helper.compute_shift(k.timeStampAlice, k.timeStampBob)
+    k.offset = k.shift * k.tau 
+    print('offset', k.offset, 'ns')
+    print('k.cc[0:10]', k.cc[0:10])
 
     h = plt.figure(3)
-    k.plotG2()
+    k.plotCC()
     h.show()
+
+    p = plt.figure(4)
+    k.plotCC_bin()
+    p.show()
 
     plt.show()

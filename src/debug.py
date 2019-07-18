@@ -6,62 +6,50 @@ from numpy.fft import fft, ifft, fftshift
 
 import helper
 
-from scipy import signal
-t1 = np.linspace(-1, 1, 2 * 100, endpoint=False)
-sig1 = range(0, len(t1))
-plt.figure(figsize=(10,8))
-plt.plot(t1, sig1, 'r')
-plt.show()
+def calcG2(timeStampAlice, timeStampBob, offsetInt, tau):
+            
+    offset = abs(offsetInt)
 
-def nextpow2(i):
-    '''
-    Find the next power 2 number for FFT
-    '''
+    tArray = np.arange(-offset, offset, tau)
+    print('len(tArray)', len(tArray))
+    g2 = np.zeros(len(tArray))
 
-    n = 1
-    while n < i: n *= 2
-    return n
+    indexStart = 0
+    array1, array2 = helper.sortArrLen(timeStampAlice, timeStampBob)
+    # array1, array2 = helper.sortArrLen(self.timeStampAlice, self.timeStampBob)
 
-def shift_signal_in_frequency_domain(datin, shift):
-    '''
-    This is function to shift a signal in frequency domain. 
-    The idea is in the frequency domain, 
-    we just multiply the signal with the phase shift. 
-    '''
-    Nin = len(datin) 
+    for i in np.arange(0, len(array1)):    
 
-    # get the next power 2 number for fft
-    N = nextpow2(Nin +np.max(np.abs(shift)))
+        for j in np.arange(indexStart, len(array2)):
 
-    # do the fft
-    fdatin = np.fft.fft(datin, N)
+            diff = abs(array2[j] - array1[i])
 
-    # get the phase shift, shift here is D in the above explanation
-    ik = np.array([2j*np.pi*k for k in range(0, N)]) / N 
-    fshift = np.exp(-ik*shift)
+            if diff >= offset:
+                print('i', i, 'j', j, 'diff', diff, 'offset', offset, 'cont')
+                indexStart = j               
+                continue
+            
+            if diff <= offset:
+                print('i', i, 'j', j, 'diff', diff, 'offset', offset, 'break')
+                break
+            
+            #if max(self.g2) > 5*numpy.mean(self.g2):
+                #   break
+            
+            try:
+                print('index', int(diff - offset))
+                print(g2[ int(diff - offset)])
+                g2[ int(diff - offset)] +=1
+            except IndexError:
+                print('len(g2)', len(g2), 'index', int(diff - shift) )
+                # pass
+        #i+=1
+        plt.plot(tArray, g2)
+        plt.show()
 
-    # multiple the signal with shift and transform it back to time domain
-    datout = np.real(np.fft.ifft(fshift * fdatin))
+timeStampAlice = [0,1,2,3,4,5,6,7,8]
+timeStampBob = [0,0,0,0,1,2,3,4,5]
+offset = 2
+tau = 1
 
-    # only get the data have the same length as the input signal
-    datout = datout[0:Nin]
-
-    return datout
-
-
-
-# This is the amount we will move
-nShift = 50
-
-# generate the 2nd signal
-sig2 = shift_signal_in_frequency_domain(sig1, nShift)
-
-# plot two signals together
-plt.figure(figsize=(10,8))
-plt.plot(sig1, 'r', label = 'signal 1')
-plt.plot(sig2, 'b', label = 'signal 2')
-plt.legend()
-plt.show()
-
-calculate_shift = helper.compute_shift(sig1, sig2)
-print('The shift we get from cross correlation is %d, the true shift should be 50'%calculate_shift)
+calcG2(timeStampAlice, timeStampBob, offset, tau)
