@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import math
 import random
 from scipy.linalg import toeplitz
+from astropy.convolution import convolve
 
 import pyximport; pyximport.install()
 
@@ -83,7 +84,7 @@ def cross_correlation_using_fft(x, y):
     return fftshift(cc)
 
 def compute_shift(x, y):
-    assert len(x) == len(y)
+    # assert len(x) == len(y)
     cc = cross_correlation_using_fft(x, y)
 
     # assert len(cc) == len(x)
@@ -101,9 +102,10 @@ def calculate_time_offset_from_signals(times_A, signal_A,
                                     times_B, signal_B,
                                     plot=True, block=True):
     """ Calculates the time offset between signal A and signal B. """
-    convoluted_signals = signal.correlate(signal_B, signal_A)
+    # convoluted_signals = signal.correlate(signal_B, signal_A, mode = "same")
 
-    zero_index = int(len(signal_A) / 2) - 1
+    convoluted_signals = convolve(signal_B, signal_A[0: len(signal_A) - 1])
+
     dt_A = np.mean(np.diff(times_A))
     print('dt_A', dt_A)
     offset_indices = np.arange(-len(signal_A) + 1, len(signal_B))

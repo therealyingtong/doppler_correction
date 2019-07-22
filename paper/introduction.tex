@@ -1,5 +1,5 @@
 \section{Introduction}
-Entanglement-based quantum key distribution (QKD) relies on a steady source of photon pairs. The first step in establishing a key in such a scheme is the assignment of photodetection events to entangled photon pairs \cite{ho2009clock}. Due to their strong temporal correlation (down to a few 100 fs) in typical pair sources, this assignment can be done via temporal coincidence identification. However, for satellite-based photon pair sources, complexity from Doppler shift rates at different angles of elevation can cause this cross correlation to be spread out over thousands of time bins. This note introduces two methods for correcting Doppler effects in satellite-to-ground coincidence matching. 
+Entanglement-based quantum key distribution (QKD) relies on a steady source of photon pairs. The first step in establishing a key in such a scheme is the assignment of photodetection events to entangled photon pairs. Ho et al. (2009) \cite{ho2009clock} introduced an algorithm for coincidence matching under a constant time offset ($\Delta T$) and a constant frequency difference ($\Delta u$). However, for satellite-based photon pair sources, an element of Doppler shift causes the time offset and frequency difference between the two time-stamps to vary in time ($\Delta T(t),\Delta u(t)$). The complexity from Doppler shift rates at different angles of elevation can cause this cross correlation to be spread out over thousands of time bins. This note introduces two methods for correcting Doppler effects in satellite-to-ground coincidence matching. 
 
 \subsection{Time stamping a satellite SPDC source}
 
@@ -67,6 +67,8 @@ The time offset $\Delta t$ (eq. \ref{eq6}) can be easily corrected (Fig \ref{fig
 	\caption{Effect of Doppler shift and Doppler shift rate on photoevent sets. Trace (a) represents the event set $\{t_i\}$ on side  A, trace (b) an event  set $\{t′_j\}$ on side B  with a time offset $\frac{s(t)}{c}$ , but  the  same reference clock frequency. Trace (c) illustrates a set $\{t'_j\}$ with an additional relative frequency difference $\delta$ between both reference clocks. Image adapted from \cite{ho2009clock}.}
 	\label{fig:correlation_smear}
 \end{figure}
+
+\texttt{TODO: add in time-varying frequency}
 
 The change in the Doppler shift over time is highest at $90^\circ$ elevation angle and can reach up to nearly 400 ns/s$^2$ (Fig \ref{fig:doppler_shift_rate}). This causes a change in relative clock drift over time. This stretch is of the order of microseconds per second (23 $\mu$s/s for Doppler, 165 $\mu$s/s for clock drifts) and it causes the cross correlation to be spread out thousands of time bins, making it difficult to distinguish a significant peak in the cross correlation.
 
