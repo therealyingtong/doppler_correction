@@ -1,33 +1,40 @@
 import sys
 import numpy as np
 
-from binParser import parseStamp
-from timeStampProcessor import TimeStamps
-from xcorrProcessor import XCorr
+from key import Key
 
+# load data
 filenameAlice = sys.argv[1]
 filenameBob = sys.argv[2]
-tau = int(sys.argv[3])
+filenameTLE = sys.argv[3]
+filenameSavedPass = sys.argv[4]
+tau = 100000
+f = 1e9
 
-# parse files
-timeStampAlice, detectorAlice = parseStamp(filenameAlice)
-np.save('../data/timeStampAlice', timeStampAlice)
-np.save('../data/detectorAlice', detectorAlice)
+key = Key(
+    filenameAlice,
+    filenameBob,
+    filenameTLE,
+    filenameSavedPass,
+    tau,
+    f
+)
 
-timeStampBob, detectorBob = parseStamp(filenameBob)
-np.save('../data/timeStampBob', timeStampBob)
-np.save('../data/detectorBob', detectorBob)
+# parse satellite info
+key.parseSatellite()
 
-# process timestamps
-timestamps = TimeStamps(timeStampAlice, timeStampBob, tau)
-timestamps.processStamp()
-print("saving timebinAlice")
-print("saving timebinBob")
-timestamps.plotAll()
+# doppler
+key.calcDoppler()
+key.plotDoppler()
 
-# cross-correlation
-xcorr = XCorr(timestamps.timebinAlice, timestamps.timebinBob, timestamps.tau)
-xcorr.xcorr()
-np.save('../data/cc', xcorr.cc)
-# xcorr.plotXcorr()
-xcorr.plotCC()
+# # parse timestamps
+# key.parseStamp()
+
+# # process timestamps
+# key.processStamps()
+# key.plotStamps()
+
+# # cross-correlation
+# key.xcorr()
+# key.plotXcorr()
+

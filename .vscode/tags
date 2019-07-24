@@ -1,0 +1,83 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Key	../src/key.py	/^class Key:$/;"	kind:class	line:10
+KeyGenerator	../src/keyGenerator.py	/^class KeyGenerator:$/;"	kind:class	line:19
+XCorr	../src/processor/xcorrProcessor.py	/^class XCorr:$/;"	kind:class	line:12
+__init__	../src/key.py	/^    def __init__($/;"	kind:member	line:12
+__init__	../src/keyGenerator.py	/^    def __init__(self, filenameAlice = [], filenameBob=[], inputMode = "bin64"):$/;"	kind:member	line:21
+__init__	../src/processor/xcorrProcessor.py	/^    def __init__(self, signal1, signal2, tau):$/;"	kind:member	line:14
+basisReconciliation	../src/keyGenerator.py	/^    def basisReconciliation(self):$/;"	kind:member	line:166
+bin	../src/processor/stampProcessor.py	/^    def bin(arr,t):$/;"	kind:function	line:17
+bitExtraction	../src/keyGenerator.py	/^    def bitExtraction(self):$/;"	kind:member	line:239
+calcBalance	../src/keyGenerator.py	/^    def calcBalance(self):$/;"	kind:member	line:54
+calcG2	../src/debug.py	/^def calcG2(timeStampAlice, timeStampBob, offsetInt, tau):$/;"	kind:function	line:9
+calcG2	../src/keyGenerator.py	/^    def calcG2(self, minDiff = -10e-3, maxDiff = 10e-3, tau = 1, stable = 0):$/;"	kind:member	line:61
+calcG2Shift	../src/keyGenerator.py	/^    def calcG2Shift(self, tau = 10000):$/;"	kind:member	line:97
+calcLinkParameters	../src/keyGenerator.py	/^    def calcLinkParameters(self):$/;"	kind:member	line:47
+calculate_time_offset_from_signals	../src/helper.py	/^def calculate_time_offset_from_signals(times_A, signal_A,$/;"	kind:function	line:71
+cascade	../src/keyGenerator.py	/^        def cascade(block1, block2, errors = 0):$/;"	kind:function	line:251
+compute_shift	../src/helper.py	/^def compute_shift(x, y):$/;"	kind:function	line:56
+compute_shift	../src/keyGenerator.py	/^        def compute_shift(x, y):$/;"	kind:function	line:108
+convertStamp	../src/keyGenerator.py	/^    def convertStamp(self, stamp):$/;"	kind:member	line:30
+cross_correlation_using_fft	../src/helper.py	/^def cross_correlation_using_fft(x, y):$/;"	kind:function	line:47
+cross_correlation_using_fft	../src/keyGenerator.py	/^        def cross_correlation_using_fft(x, y):$/;"	kind:function	line:102
+debug.py	../src/debug.py	1;"	kind:file	line:1
+determineQBER	../src/keyGenerator.py	/^    def determineQBER(self):$/;"	kind:member	line:236
+determineStart	../src/keyGenerator.py	/^    def determineStart(self):$/;"	kind:member	line:322
+doppler.py	../src/doppler.py	1;"	kind:file	line:1
+errorCorrection	../src/keyGenerator.py	/^    def errorCorrection(self): # https:\/\/apps.dtic.mil\/dtic\/tr\/fulltext\/u2\/a557404.pdf$/;"	kind:member	line:246
+errorEstimation	../src/keyGenerator.py	/^    def errorEstimation(self):$/;"	kind:member	line:222
+filenameAlice	../src/main.py	/^filenameAlice = sys.argv[1]$/;"	kind:variable	line:8
+filenameBob	../src/main.py	/^filenameBob = sys.argv[2]$/;"	kind:variable	line:9
+filenameLoc	../src/main.py	/^filenameLoc = sys.argv[4]$/;"	kind:variable	line:11
+filenameTLE	../src/main.py	/^filenameTLE = sys.argv[3]$/;"	kind:variable	line:10
+findMinOfTwoArrays	../src/helper.py	/^def findMinOfTwoArrays(arr1, arr2):$/;"	kind:function	line:26
+findNextPower2	../src/processor/stampProcessor.py	/^        def findNextPower2(number):$/;"	kind:function	line:46
+findOffset	../src/keyGenerator.py	/^    def findOffset(self):$/;"	kind:member	line:162
+firstZeroIndex	../src/helper.py	/^def firstZeroIndex(arr):$/;"	kind:function	line:13
+getDataForTimeInterval	../src/keyGenerator.py	/^    def getDataForTimeInterval(self, f, stampArray, bases, intervalTime, startTime):$/;"	kind:member	line:336
+helper.py	../src/helper.py	1;"	kind:file	line:1
+k	../src/keyGenerator.py	/^    k = KeyGenerator("..\/tableTopDemoData\/beacon\/20190416_10_kHZ_beaconTestAlice", "..\/tableTopDemoData\/beacon\/20190416_10_kHZ_beaconTestBob", 'hex1')$/;"	kind:variable	line:404
+key	../src/main.py	/^key = Key($/;"	kind:variable	line:14
+key.py	../src/key.py	1;"	kind:file	line:1
+keyGenerator.py	../src/keyGenerator.py	1;"	kind:file	line:1
+main.py	../src/main.py	1;"	kind:file	line:1
+offset	../src/debug.py	/^offset = 2$/;"	kind:variable	line:52
+pad	../src/keyGenerator.py	/^        def pad(arr1, arr2):$/;"	kind:function	line:137
+padFFT	../src/processor/stampProcessor.py	/^    def padFFT(arr1, arr2):$/;"	kind:function	line:44
+padXcorr	../src/helper.py	/^def padXcorr(arr1, arr2):$/;"	kind:function	line:31
+parseSatellite	../src/key.py	/^    def parseSatellite(self):$/;"	kind:member	line:38
+parseSatellite	../src/parser/satParser.py	/^def parseSatellite(filenameTLE, filenameLoc):$/;"	kind:function	line:3
+parseStamp	../src/key.py	/^    def parseStamp(self):$/;"	kind:member	line:25
+parseStamp	../src/parser/stampParser.py	/^def parseStamp(filename):$/;"	kind:function	line:5
+plot	../src/processor/stampProcessor.py	/^    def plot(data, xlabel, ylabel, title):$/;"	kind:function	line:81
+plotAll	../src/processor/stampProcessor.py	/^def plotAll(self):$/;"	kind:function	line:79
+plotCC	../src/processor/xcorrProcessor.py	/^    def plotCC(self):$/;"	kind:member	line:48
+plotG2	../src/keyGenerator.py	/^    def plotG2(self):$/;"	kind:member	line:376
+plotXcorr	../src/processor/xcorrProcessor.py	/^    def plotXcorr(self):$/;"	kind:member	line:26
+printResults	../src/keyGenerator.py	/^    def printResults(self):$/;"	kind:member	line:385
+privacyAmplification	../src/keyGenerator.py	/^    def privacyAmplification(self):$/;"	kind:member	line:310
+processStamp	../src/processor/stampProcessor.py	/^def processStamp(self):$/;"	kind:function	line:72
+processStamps	../src/key.py	/^    def processStamps(self):$/;"	kind:member	line:43
+removeAnomalies	../src/processor/stampProcessor.py	/^def removeAnomalies(self):$/;"	kind:function	line:4
+satParser.py	../src/parser/satParser.py	1;"	kind:file	line:1
+setStart	../src/processor/stampProcessor.py	/^def setStart(self):$/;"	kind:function	line:10
+setStartTime	../src/keyGenerator.py	/^    def setStartTime(self):$/;"	kind:member	line:27
+sortArrLen	../src/helper.py	/^def sortArrLen(arr1, arr2):$/;"	kind:function	line:19
+stampParser.py	../src/parser/stampParser.py	1;"	kind:file	line:1
+stampPreparation	../src/keyGenerator.py	/^    def stampPreparation(self, intervalTime = 2e9):$/;"	kind:member	line:351
+stampProcessor.py	../src/processor/stampProcessor.py	1;"	kind:file	line:1
+tau	../src/debug.py	/^tau = 1$/;"	kind:variable	line:53
+tau	../src/main.py	/^tau = 100000$/;"	kind:variable	line:12
+timeStampAlice	../src/debug.py	/^timeStampAlice = [0,1,2,3,4,5,6,7,8]$/;"	kind:variable	line:50
+timeStampBob	../src/debug.py	/^timeStampBob = [0,0,0,0,1,2,3,4,5]$/;"	kind:variable	line:51
+timebin	../src/keyGenerator.py	/^        def timebin(arr,t):$/;"	kind:function	line:121
+timebin	../src/processor/stampProcessor.py	/^def timebin(self):$/;"	kind:function	line:15
+timestamps	../src/main.py	/^timestamps = TimeStamps(timeStampAlice, timeStampBob, tau)$/;"	kind:variable	line:29
+xcorr	../src/main.py	/^xcorr = XCorr(timestamps.timebinAlice, timestamps.timebinBob, timestamps.tau)$/;"	kind:variable	line:36
+xcorr	../src/processor/xcorrProcessor.py	/^    def xcorr(self):$/;"	kind:member	line:19
+xcorrProcessor.py	../src/processor/xcorrProcessor.py	1;"	kind:file	line:1
