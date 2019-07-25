@@ -10,52 +10,71 @@ import pyximport; pyximport.install()
 
 def xcorr(self):
 
-    def compute_shift(x, y):
+	def compute_shift(x, y):
 
-        def cross_correlation_using_fft(x, y):
-            print('starting f1 = fft(x)')
-            f1 = fft(x)
-            print('starting f2 = fft(np.flipud(y))')
-            f2 = fft(np.flipud(y))
-            print('starting cc = np.real(ifft(f1 * f2))')
-            cc = np.real(ifft(f1 * f2))
-            return fftshift(cc)
+		def cross_correlation_using_fft(x, y):
+			print('starting f1 = fft(x)')
+			f1 = fft(x)
+			print('starting f2 = fft(np.flipud(y))')
+			f2 = fft(np.flipud(y))
+			print('starting cc = np.real(ifft(f1 * f2))')
+			cc = np.real(ifft(f1 * f2))
+			return fftshift(cc)
 
-        # assert len(x) == len(y)
-        cc = cross_correlation_using_fft(x, y)
+		# assert len(x) == len(y)
+		cc = cross_correlation_using_fft(x, y)
 
-        # assert len(cc) == len(x)
-        zero_index = int(len(x) / 2) - 1
-        shift = zero_index - np.argmax(cc)
-        print('zero_index', zero_index)
-        print('cc[zero_index]', cc[zero_index])
-        print('cc[np.argmax(cc)]', cc[np.argmax(cc)])
-        print('np.argmax(cc)', np.argmax(cc))
- 
-        return zero_index, shift, cc
+		# assert len(cc) == len(x)
+		zero_index = int(len(x) / 2) - 1
+		shift = zero_index - np.argmax(cc)
+		return zero_index, shift, cc
 
-    print("starting xcorr")
-    self.zero_idx, self.shift, self.cc = compute_shift(
-        self.timebinAlice, self.timebinBob
-    )
-    np.save('../data/cc', self.cc)
-    self.offset = self.shift * self.tau
+	print("starting xcorr")
+	self.zero_idx, self.shift, self.cc = compute_shift(
+		self.timebinAlice, self.timebinBob
+	)
+	np.save('../data/cc', self.cc)
+	self.offset = self.shift * self.tau
+	print('offset', self.offset, 'ns')
+
+	print("starting dopplerXcorr")
+	self.doppler_zero_idx, self.doppler_shift, self.doppler_cc = compute_shift(
+		self.timebinAlice, self.shiftedTimebinAlice
+	)
+	np.save('../data/doppler_cc', self.doppler_cc)
+	self.doppler_offset = self.doppler_shift * self.tau
+	print('doppler offset', self.doppler_offset, 'ns')
+
 
 
 def plotXcorr(self):
-    print('saved self.cc')
-    plt.figure(5)
-    plt.plot(
-        self.zero_idx - np.linspace(0, len(self.cc), len(self.cc)), 
-        self.cc, 
-        '-sk', markersize = 5
-    )
-    print('plotted plotCC')
-    plt.xlabel("Delay (" + str(self.tau) + "ns)")
-    plt.ylabel("Coincidence detections")
-    # plt.title("Offset = " + str(
-    #     (self.zero_index_bin - np.argmax(self.cc_bin_norm)) * self.tau) + "ns")
-    # plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
-    # plt.grid(True)
-    plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
+	plt.figure()
+	plt.plot(
+		self.zero_idx - np.linspace(0, len(self.cc), len(self.cc)), 
+		self.cc, 
+		'-sk', markersize = 5
+	)
+	print('plotted cc')
+	plt.xlabel("Delay (" + str(self.tau) + "ns)")
+	plt.ylabel("Coincidence detections")
+	# plt.title("Offset = " + str(
+	#     (self.zero_index_bin - np.argmax(self.cc_bin_norm)) * self.tau) + "ns")
+	# plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
+	# plt.grid(True)
+	plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
+
+	plt.figure()
+	plt.plot(
+		self.doppler_zero_idx - np.linspace(0, len(self.doppler_cc), len(self.doppler_cc)), 
+		self.doppler_cc, 
+		'-sk', markersize = 5
+	)
+	print('plotted doppler_cc')
+	plt.xlabel("Delay (" + str(self.tau) + "ns)")
+	plt.ylabel("Coincidence detections")
+	# plt.title("Offset = " + str(
+	#     (self.zero_index_bin - np.argmax(self.cc_bin_norm)) * self.tau) + "ns")
+	# plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
+	# plt.grid(True)
+	plt.savefig("../paper/assets/doppler_cc.png", bbox_inches = 'tight')
 

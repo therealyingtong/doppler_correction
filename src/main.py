@@ -10,6 +10,7 @@ filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
 tau = 100000
 f = 1e9
+units = 1e-9
 
 key = Key(
     filenameAlice,
@@ -17,24 +18,28 @@ key = Key(
     filenameTLE,
     filenameSavedPass,
     tau,
-    f
+    f,
+	units
 )
 
 # parse satellite info
 key.parseSatellite()
 
-# doppler
+# parse timestamps
+key.parseStamp()
+
+# process timestamps
+key.processStamps()
+
+# # doppler
 key.calcDoppler()
+key.shiftDoppler()
 key.plotDoppler()
 
-# # parse timestamps
-# key.parseStamp()
+# cross-correlation
+key.binStamps()
+key.xcorr()
 
-# # process timestamps
-# key.processStamps()
-# key.plotStamps()
-
-# # cross-correlation
-# key.xcorr()
-# key.plotXcorr()
-
+# plot
+key.plotStamps()
+key.plotXcorr()
