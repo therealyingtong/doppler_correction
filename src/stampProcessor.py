@@ -8,11 +8,12 @@ def removeAnomalies(self):
     self.timeStampBob = self.timeStampBob[0: int( 8.2*len(self.timeStampBob)/14 )]
 
 def setStart(self):
-    print("setting start of timestamps to 0")
-    self.timeStampAlice = self.timeStampAlice - min(self.timeStampAlice)
-    self.timeStampBob = self.timeStampBob - min(self.timeStampBob)
+	print("setting start of timestamps to 0")
+	# minTime = min([min(self.timeStampAlice), min(self.timeStampBob)])
+	self.timeStampAlice = self.timeStampAlice - min(self.timeStampAlice)
+	self.timeStampBob = self.timeStampBob - min(self.timeStampBob)
 
-def timebin(self):
+def timebin(self, timeStamp1, timeStamp2):
 
 	def bin(arr,t):
 		counter =0
@@ -32,20 +33,16 @@ def timebin(self):
 	print("starting to bin timestamps")
 
 	print("starting to bin alice timestamps")
-	self.timebinAlice = bin(self.timeStampAlice, self.tau)
-	print("starting to bin shifted alice timestamps")
-	self.shiftedTimebinAlice = bin(self.shiftedTimeStampAlice, self.tau)
+	self.timebinAlice = bin(timeStamp1, self.tau)
 	print("starting to bin bob timestamps")
-	self.timebinBob = bin(self.timeStampBob, self.tau)
+	self.timebinBob = bin(timeStamp2, self.tau)
 
 	# trim leading and trailing zeros
 	self.timebinAlice = np.trim_zeros(self.timebinAlice)
-	self.shiftedTimebinAlice = np.trim_zeros(self.shiftedTimebinAlice)
 	self.timebinBob = np.trim_zeros(self.timebinBob) 
 
 	# normalise timebins
 	self.timebinAlice = self.timebinAlice - np.mean(self.timebinAlice)
-	self.shiftedTimebinAlice = self.shiftedTimebinAlice - np.mean(self.shiftedTimebinAlice)
 	self.timebinBob = self.timebinBob - np.mean(self.timebinBob)
 
 	def padFFT(arr1, arr2):
@@ -72,43 +69,35 @@ def timebin(self):
 	self.timebinAlice, self.timebinBob = padFFT(
 		self.timebinAlice, self.timebinBob
 	)
-	self.timebinAlice, self.shiftedTimebinAlice = padFFT(
-		self.timebinAlice, self.shiftedTimebinAlice
-	)
-
 	self.timebinAlice = self.timebinAlice[10:]
-	self.shiftedTimebinAlice = self.shiftedTimebinAlice[10:]
 	self.timebinBob = self.timebinBob[10:]
 
 def plotStamps(self):
 
-    def plot(data, xlabel, ylabel, title):
-        plt.plot(
-            data,
-            marker = 'o' , 
-            markersize = 2,
-            # linestyle = "None"
-        )
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        plt.savefig("../paper/assets/"+title+".png", bbox_inches = 'tight')
+	def plot(data, xlabel, ylabel, title):
+		plt.plot(
+			data,
+			marker = 'o' , 
+			markersize = 2,
+			# linestyle = "None"
+		)
+		plt.xlabel(xlabel)
+		plt.ylabel(ylabel)
+		plt.savefig("../paper/assets/"+title+".png", bbox_inches = 'tight')
+		plt.close()
 
-    print("plotting timeStampAlice")
-    plt.figure()
-    plot(self.timeStampAlice, "Timestamps", "Event index", "alice")
+	print("plotting timeStampAlice")
+	plt.figure()
+	plot(self.timeStampAlice, "Timestamps", "Event index", "alice")
 
-    print("plotting timeStampBob")
-    plt.figure()
-    plot(self.timeStampBob, "Timestamps", "Event index", "bob")
+	print("plotting timeStampBob")
+	plt.figure()
+	plot(self.timeStampBob, "Timestamps", "Event index", "bob")
 
-    print("plotting timebinAlice")
-    plt.figure()
-    plot(self.timebinAlice, "Timebins", "Events", "alice_bin")
+	print("plotting timebinAlice")
+	plt.figure()
+	plot(self.timebinAlice, "Timebins", "Events", "alice_bin")
 
-    print("plotting shiftedTimeBinAlice")
-    plt.figure()
-    plot(self.shiftedTimebinAlice, "Timebins", "Events", "alice_shift_bin")
-
-    print("plotting timebinBob")
-    plt.figure()
-    plot(self.timebinBob, "Timebins", "Events", "bob_bin")
+	print("plotting timebinBob")
+	plt.figure()
+	plot(self.timebinBob, "Timebins", "Events", "bob_bin")

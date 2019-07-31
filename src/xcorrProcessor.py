@@ -37,15 +37,6 @@ def xcorr(self):
 	self.offset = self.shift * self.tau
 	print('offset', self.offset, 'ns')
 
-	print("starting dopplerXcorr")
-	self.doppler_zero_idx, self.doppler_shift, self.doppler_cc = compute_shift(
-		self.timebinAlice, self.shiftedTimebinAlice
-	)
-	np.save('../data/doppler_cc', self.doppler_cc)
-	self.doppler_offset = self.doppler_shift * self.tau
-	print('doppler offset', self.doppler_offset, 'ns')
-
-
 
 def plotXcorr(self):
 	plt.figure()
@@ -62,19 +53,5 @@ def plotXcorr(self):
 	# plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
 	# plt.grid(True)
 	plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
-
-	plt.figure()
-	plt.plot(
-		self.doppler_zero_idx - np.linspace(0, len(self.doppler_cc), len(self.doppler_cc)), 
-		self.doppler_cc, 
-		'-sk', markersize = 5
-	)
-	print('plotted doppler_cc')
-	plt.xlabel("Delay (" + str(self.tau) + "ns)")
-	plt.ylabel("Coincidence detections")
-	# plt.title("Offset = " + str(
-	#     (self.zero_index_bin - np.argmax(self.cc_bin_norm)) * self.tau) + "ns")
-	# plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
-	# plt.grid(True)
-	plt.savefig("../paper/assets/doppler_cc.png", bbox_inches = 'tight')
+	plt.close()
 

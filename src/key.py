@@ -18,7 +18,8 @@ class Key:
 		filenameSavedPass,
 		tau,
 		f,
-		units
+		units,
+		delay
 	):
 		self.filenameAlice = filenameAlice
 		self.filenameBob = filenameBob
@@ -27,9 +28,9 @@ class Key:
 		self.tau = tau
 		self.f = f
 		self.units = units
+		self.delay = delay
 
 		self.timeStampAlice = None
-		self.shiftedTimeStampAlice = None
 		self.detectorAlice = None
 		self.timeStampBob = None
 		self.detectorBob = None
@@ -39,7 +40,6 @@ class Key:
 		self.startTime = None
 
 		self.timebinAlice = None
-		self.shiftedTimebinAlice = None
 		self.timebinBob = None
 
 		self.zero_idx = None
@@ -89,14 +89,11 @@ class Key:
 			stampProcessor.removeAnomalies(self)
 		stampProcessor.setStart(self)
 
-	def binStamps(self):
-		stampProcessor.timebin(self)
+	def binStamps(self, timeStamp1, timeStamp2):
+		stampProcessor.timebin(self, timeStamp1, timeStamp2)
 		print("finished processing timeStamps")
 		np.save('../data/timebinAlice', self.timebinAlice)
 		np.save('../data/timebinBob', self.timebinBob)
-
-	def shiftDoppler(self):
-		dopplerProcessor.shiftDoppler(self)
 
 	def plotStamps(self):
 		stampProcessor.plotStamps(self)
