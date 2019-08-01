@@ -19,7 +19,8 @@ class Key:
 		tau,
 		f,
 		units,
-		delay
+		clockOffset,
+		clockDrift
 	):
 		self.filenameAlice = filenameAlice
 		self.filenameBob = filenameBob
@@ -28,7 +29,8 @@ class Key:
 		self.tau = tau
 		self.f = f
 		self.units = units
-		self.delay = delay
+		self.clockOffset = clockOffset
+		self.clockDrift = clockDrift
 
 		self.timeStampAlice = None
 		self.detectorAlice = None

@@ -13,7 +13,8 @@ tau = 100000
 # tau = 1000000
 f = 1e9
 units = 1e-9
-delay = 1000000
+clockOffset = 1000000
+clockDrift = 0.1
 
 key = Key(
     filenameAlice,
@@ -23,7 +24,8 @@ key = Key(
     tau,
     f,
 	units,
-	delay
+	clockOffset,
+	clockDrift
 )
 
 # parse satellite info
@@ -41,16 +43,25 @@ key.plotDoppler()
 
 dopplerShift = DopplerShift(
 	key.timeStampAlice,
-	delay,
+	clockOffset,
+	clockDrift,
+	key.tau,
+	key.units,
 	key.nt_list,
 	key.delay_list,
 	key.df_list
 )
-dopplerShift.shift()
+dopplerShift.firstOrderDopplerShift()
+dopplerShift.secondOrderDopplerShift()
 aliceShifted = dopplerShift.shiftedTimeStamp
 
 # cross-correlation
 key.binStamps(key.timeStampAlice, aliceShifted)
+
+# dopplerShift.shiftedTimebin = key.timebinBob
+# dopplerShift.secondOrderDopplerShift()
+# key.timebinBob = dopplerShift.shiftedTimebin
+
 key.xcorr()
 
 # plot

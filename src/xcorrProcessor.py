@@ -42,6 +42,7 @@ def plotXcorr(self):
 	plt.figure()
 	plt.plot(
 		self.zero_idx - np.linspace(0, len(self.cc), len(self.cc)), 
+		# np.linspace(0, len(self.cc), len(self.cc)), 
 		self.cc, 
 		'-sk', markersize = 5
 	)
