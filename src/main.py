@@ -9,7 +9,7 @@ filenameAlice = sys.argv[1]
 filenameBob = sys.argv[2]
 filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
-mode = sys.argv[5] # unshifted, doppler, or aliceBob
+mode = sys.argv[5] # unshifted, firstDoppler, secondDoppler, or aliceBob
 
 tau = 100000
 # tau = 1000000
@@ -39,30 +39,32 @@ key.parseStamp()
 # process timestamps
 key.processStamps()
 
-# doppler
-key.calcDoppler()
-key.plotDoppler()
+if (mode == 'firstDoppler' or 'secondDoppler'):
+	# doppler
+	key.calcDoppler()
+	key.plotDoppler()
 
-dopplerShift = DopplerShift(
-	key.timeStampAlice,
-	clockOffset,
-	clockDrift,
-	key.tau,
-	key.units,
-	key.nt_list,
-	key.delay_list,
-	key.df_list
-)
-dopplerShift.firstOrderDopplerShift()
-dopplerShift.secondOrderDopplerShift()
-aliceShifted = dopplerShift.shiftedTimeStamp
+	dopplerShift = DopplerShift(
+		key.timeStampAlice,
+		clockOffset,
+		clockDrift,
+		key.tau,
+		key.units,
+		key.nt_list,
+		key.delay_list,
+		key.df_list
+	)
+	dopplerShift.firstOrderDopplerShift()
+	if (mode != 'firstDoppler'):
+		dopplerShift.secondOrderDopplerShift()
+
+	aliceShifted = dopplerShift.shiftedTimeStamp
 
 # cross-correlation
-
-if (mode == 'doppler'):
-	key.binStamps(key.timeStampAlice, aliceShifted)
-elif (mode == 'unshifted'):
+if (mode == 'unshifted'):
 	key.binStamps(key.timeStampAlice, key.timeStampAlice)
+elif (mode == 'firstDoppler' or 'secondDoppler'):
+	key.binStamps(key.timeStampAlice, aliceShifted)
 elif (mode == 'aliceBob'):
 	key.binStamps(key.timeStampAlice, key.timeStampBob)
 
