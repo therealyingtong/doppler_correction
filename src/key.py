@@ -97,12 +97,12 @@ class Key:
 		np.save('../data/timebinAlice', self.timebinAlice)
 		np.save('../data/timebinBob', self.timebinBob)
 
-	def plotStamps(self):
-		stampProcessor.plotStamps(self)
+	def plotStamps(self, title):
+		stampProcessor.plotStamps(self, title)
 
 	def xcorr(self):
 		xcorrProcessor.xcorr(self)
 
-	def plotXcorr(self):
-		xcorrProcessor.plotXcorr(self)
+	def plotXcorr(self, title):
+		xcorrProcessor.plotXcorr(self, title)
 

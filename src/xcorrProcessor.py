@@ -38,12 +38,16 @@ def xcorr(self):
 	print('offset', self.offset, 'ns')
 
 
-def plotXcorr(self):
+def plotXcorr(self, title):
 	plt.figure()
+	max_idx = np.argmax(self.cc)
+	start_idx = int(max_idx - len(self.cc) / 32)
+	end_idx = int(max_idx + len(self.cc) / 32)
+	length = end_idx - start_idx 
 	plt.plot(
-		self.zero_idx - np.linspace(0, len(self.cc), len(self.cc)), 
-		# np.linspace(0, len(self.cc), len(self.cc)), 
-		self.cc, 
+		# self.zero_idx - np.linspace(0, len(self.cc), len(self.cc)), 
+		self.zero_idx - np.linspace(start_idx, end_idx, length), 
+		self.cc[start_idx:start_idx + length], 
 		'-sk', markersize = 5
 	)
 	print('plotted cc')
@@ -53,6 +57,6 @@ def plotXcorr(self):
 	#     (self.zero_index_bin - np.argmax(self.cc_bin_norm)) * self.tau) + "ns")
 	# plt.annotate(str(self.shift_bin), xy=(self.shift_bin, 0))
 	# plt.grid(True)
-	plt.savefig("../paper/assets/cc.png", bbox_inches = 'tight')
+	plt.savefig("../paper/assets/"+title+"_cc.png", bbox_inches = 'tight')
 	plt.close()
 

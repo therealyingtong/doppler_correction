@@ -72,7 +72,7 @@ def timebin(self, timeStamp1, timeStamp2):
 	self.timebinAlice = self.timebinAlice[10:]
 	self.timebinBob = self.timebinBob[10:]
 
-def plotStamps(self):
+def plotStamps(self, title):
 
 	def plot(data, xlabel, ylabel, title):
 		plt.plot(
@@ -88,16 +88,16 @@ def plotStamps(self):
 
 	print("plotting timeStampAlice")
 	plt.figure()
-	plot(self.timeStampAlice, "Timestamps", "Event index", "alice")
+	plot(self.timeStampAlice, "Timestamps", "Event index", title + "TimeStampAlice")
 
 	print("plotting timeStampBob")
 	plt.figure()
-	plot(self.timeStampBob, "Timestamps", "Event index", "bob")
+	plot(self.timeStampBob, "Timestamps", "Event index", title + "TimeStampBob")
 
 	print("plotting timebinAlice")
 	plt.figure()
-	plot(self.timebinAlice, "Timebins", "Events", "alice_bin")
+	plot(self.timebinAlice, "Timebins", "Events", title + "TimebinAlice")
 
 	print("plotting timebinBob")
 	plt.figure()
-	plot(self.timebinBob, "Timebins", "Events", "bob_bin")
+	plot(self.timebinBob, "Timebins", "Events", title + "TimebinBob")

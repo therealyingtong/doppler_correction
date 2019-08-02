@@ -46,7 +46,7 @@ class DopplerShift:
 		for i in range(len(self.shiftedTimeStamp)):
 			t = self.shiftedTimeStamp[i] 
 			drift = self.clockDrift
-			secondOrderShift = t*drift + t*drift*(coeffs[0]*drift*drift*drift + coeffs[1]*drift*drift + coeffs[2]*drift + coeffs[3])
+			secondOrderShift = t*drift*(coeffs[0]*drift*drift*drift + coeffs[1]*drift*drift + coeffs[2]*drift + coeffs[3])
 			self.shiftedTimeStamp[i] = t + secondOrderShift
 			# print('t', t)
 			# print('drift', drift)
@@ -66,10 +66,4 @@ class DopplerShift:
 	def offset(self):
 		self.shiftedTimeStamp = self.shiftedTimeStamp[self.clockOffset:].copy()
 
-	def plotDopplerShift(self):
-		print("plotting Doppler shifted signal")
-		plt.figure()
-		plt.plot(self.shiftedTimeStamp)
-		plt.savefig("../paper/assets/doppler_shifted.png") 
-		plt.close()
 

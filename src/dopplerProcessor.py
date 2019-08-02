@@ -32,7 +32,7 @@ def calcDoppler(self):
 		
 	for v in v_list:
 		# df = ephem.c / (ephem.c + v)
-		df = v / ephem.c
+		df = - v / ephem.c
 		df_list.append(df)
 
 	self.nt_list = [nt / self.units for nt in nt_list]

@@ -9,12 +9,14 @@ filenameAlice = sys.argv[1]
 filenameBob = sys.argv[2]
 filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
+mode = sys.argv[5] # unshifted, doppler, or aliceBob
+
 tau = 100000
 # tau = 1000000
 f = 1e9
 units = 1e-9
 clockOffset = 1000000
-clockDrift = 0.1
+clockDrift = 0.7
 
 key = Key(
     filenameAlice,
@@ -37,7 +39,7 @@ key.parseStamp()
 # process timestamps
 key.processStamps()
 
-# # doppler
+# doppler
 key.calcDoppler()
 key.plotDoppler()
 
@@ -56,14 +58,16 @@ dopplerShift.secondOrderDopplerShift()
 aliceShifted = dopplerShift.shiftedTimeStamp
 
 # cross-correlation
-key.binStamps(key.timeStampAlice, aliceShifted)
 
-# dopplerShift.shiftedTimebin = key.timebinBob
-# dopplerShift.secondOrderDopplerShift()
-# key.timebinBob = dopplerShift.shiftedTimebin
+if (mode == 'doppler'):
+	key.binStamps(key.timeStampAlice, aliceShifted)
+elif (mode == 'unshifted'):
+	key.binStamps(key.timeStampAlice, key.timeStampAlice)
+elif (mode == 'aliceBob'):
+	key.binStamps(key.timeStampAlice, key.timeStampBob)
 
 key.xcorr()
 
 # plot
-key.plotStamps()
-key.plotXcorr()
+key.plotStamps(mode)
+key.plotXcorr(mode)
