@@ -16,7 +16,7 @@ tau = 100000
 f = 1e9
 units = 1e-9
 clockOffset = 1000000
-clockDrift = 0.7
+clockDrift = 3e-3 #(2ms / s)
 
 key = Key(
     filenameAlice,

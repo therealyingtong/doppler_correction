@@ -36,7 +36,7 @@ class DopplerShift:
 
 		for i in range(len(self.timeStamp)):
 			t = self.shiftedTimeStamp[i]
-			self.shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2]) 
+			self.shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2]) + self.clockOffset
 
 	def secondOrderDopplerShift(self):
 		coeffs = np.polyfit(
@@ -46,7 +46,7 @@ class DopplerShift:
 		for i in range(len(self.shiftedTimeStamp)):
 			t = self.shiftedTimeStamp[i] 
 			drift = self.clockDrift
-			secondOrderShift = t*drift*(coeffs[0]*drift*drift*drift + coeffs[1]*drift*drift + coeffs[2]*drift + coeffs[3])
+			secondOrderShift = t*(drift + (coeffs[0]*t*t*t + coeffs[1]*t*t + coeffs[2]*t + coeffs[3]))
 			self.shiftedTimeStamp[i] = t + secondOrderShift
 			# print('t', t)
 			# print('drift', drift)
