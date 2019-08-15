@@ -1,19 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def removeAnomalies(self):
-    print("removing anomalies from timestamps")
-    # manually remove anomalies in timeStampBob
-    # TODO: automate this using standard deviation
-    self.timeStampBob = self.timeStampBob[0: int( 8.2*len(self.timeStampBob)/14 )]
+def removeAnomalies(timeStampBob):
+	print("removing anomalies from timestamps")
+	# manually remove anomalies in timeStampBob
+	# TODO: automate this using standard deviation
+	timeStampBob = timeStampBob[0: int( 8.2*len(timeStampBob)/14 )]
+	return timeStampBob
 
-def setStart(self):
+def setStart(timeStampAlice, timeStampBob):
 	print("setting start of timestamps to 0")
-	# minTime = min([min(self.timeStampAlice), min(self.timeStampBob)])
-	self.timeStampAlice = self.timeStampAlice - min(self.timeStampAlice)
-	self.timeStampBob = self.timeStampBob - min(self.timeStampBob)
 
-def timebin(self, timeStamp1, timeStamp2):
+	timeStampAlice = timeStampAlice - min(timeStampAlice)
+	timeStampBob = timeStampBob - min(timeStampBob)
+	return timeStampAlice, timeStampBob
+
+def timebin(tau, timeStamp1, timeStamp2):
 
 	def bin(arr,t):
 		counter =0
@@ -33,17 +35,17 @@ def timebin(self, timeStamp1, timeStamp2):
 	print("starting to bin timestamps")
 
 	print("starting to bin alice timestamps")
-	self.timebinAlice = bin(timeStamp1, self.tau)
+	timebinAlice = bin(timeStamp1, tau)
 	print("starting to bin bob timestamps")
-	self.timebinBob = bin(timeStamp2, self.tau)
+	timebinBob = bin(timeStamp2, tau)
 
 	# trim leading and trailing zeros
-	self.timebinAlice = np.trim_zeros(self.timebinAlice)
-	self.timebinBob = np.trim_zeros(self.timebinBob) 
+	timebinAlice = np.trim_zeros(timebinAlice)
+	timebinBob = np.trim_zeros(timebinBob) 
 
 	# normalise timebins
-	self.timebinAlice = self.timebinAlice - np.mean(self.timebinAlice)
-	self.timebinBob = self.timebinBob - np.mean(self.timebinBob)
+	timebinAlice = timebinAlice - np.mean(timebinAlice)
+	timebinBob = timebinBob - np.mean(timebinBob)
 
 	def padFFT(arr1, arr2):
 
@@ -66,13 +68,14 @@ def timebin(self, timeStamp1, timeStamp2):
 		return arr1, arr2
 
 	# # pad arrays to same size
-	self.timebinAlice, self.timebinBob = padFFT(
-		self.timebinAlice, self.timebinBob
+	timebinAlice, timebinBob = padFFT(
+		timebinAlice, timebinBob
 	)
-	self.timebinAlice = self.timebinAlice[10:]
-	self.timebinBob = self.timebinBob[10:]
+	timebinAlice = timebinAlice[10:]
+	timebinBob = timebinBob[10:]
+	return timebinAlice, timebinBob
 
-def plotStamps(self, title):
+def plotStamps(timeStampAlice, timeStampBob, timebinAlice, timebinBob, title):
 
 	def plot(data, xlabel, ylabel, title):
 		plt.plot(
@@ -88,16 +91,16 @@ def plotStamps(self, title):
 
 	print("plotting timeStampAlice")
 	plt.figure()
-	plot(self.timeStampAlice, "Timestamps", "Event index", title + "TimeStampAlice")
+	plot(timeStampAlice, "Timestamps", "Event index", title + "TimeStampAlice")
 
 	print("plotting timeStampBob")
 	plt.figure()
-	plot(self.timeStampBob, "Timestamps", "Event index", title + "TimeStampBob")
+	plot(timeStampBob, "Timestamps", "Event index", title + "TimeStampBob")
 
 	print("plotting timebinAlice")
 	plt.figure()
-	plot(self.timebinAlice, "Timebins", "Events", title + "TimebinAlice")
+	plot(timebinAlice, "Timebins", "Events", title + "TimebinAlice")
 
 	print("plotting timebinBob")
 	plt.figure()
-	plot(self.timebinBob, "Timebins", "Events", title + "TimebinBob")
+	plot(timebinBob, "Timebins", "Events", title + "TimebinBob")

@@ -1,51 +1,54 @@
 import ephem
+import astropy as astro
 import matplotlib.pyplot as plt
 import numpy as np 
+import scipy.constants as constants
 
-def calcDoppler(self):
+def calcDoppler(sat, loc, startTime, timeStamp, units):
 
 	print("calculating Doppler shift")
 
 	s_list = [] # range (range = distance from observer to satellite)
 	v_list = [] # range rate of change 
 	t_list = [] # time
-	timeRange = (max(self.timeStampAlice) - min(self.timeStampAlice)) * self.units
+	timeRange = (max(timeStamp) - min(timeStamp)) * units
 	print('timeRange', timeRange)
 	for i in range (int(timeRange) * 10):
-		d_time = ephem.Date(self.startTime + (ephem.second * i * 0.1))
+		d_time = ephem.Date(startTime + (ephem.second * i * 0.1))
 
-		self.loc.date = d_time
+		loc.date = d_time
 
-		self.sat.compute(self.loc)
+		sat.compute(loc)
 
-		s_list.append(self.sat.range)
-		v_list.append(self.sat.range_velocity)
+		s_list.append(sat.range)
+		v_list.append(sat.range_velocity)
 		t_list.append(d_time)
 
 	df_list = []
 	delay_list = []
-	nt_list = [(t - self.startTime)*24*60*60 for t in t_list]
+	nt_list = [(t - startTime)*24*60*60 for t in t_list]
 
 	for s in s_list:
-		delay = s / ephem.c
+		delay = s / constants.c
 		delay_list.append(delay)
 		
 	for v in v_list:
-		# df = ephem.c / (ephem.c + v)
-		df = - v / ephem.c
+		df = - v / constants.c
 		df_list.append(df)
 
-	self.nt_list = [nt / self.units for nt in nt_list]
-	self.df_list = [df * 2e2 for df in df_list]
-	self.delay_list = [delay / self.units for delay in delay_list]
+	nt_list = [nt / units for nt in nt_list]
+	delay_list = [delay / units for delay in delay_list]
+	df_list = [df * 2e2 for df in df_list]
+
+	return nt_list, delay_list, df_list
 
 
-def plotDoppler(self):
+def plotDoppler(nt_list, df_list, delay_list):
 
 	print("plotting Doppler shift")
 
 	plt.figure()
-	plt.plot(self.nt_list, self.df_list)
+	plt.plot(nt_list, df_list)
 	plt.title('Second order Doppler shift')
 	plt.xlabel("time (ns)")
 	plt.ylabel('second order Doppler shift')
@@ -54,7 +57,7 @@ def plotDoppler(self):
 
 	print("plotting Doppler delay")
 	plt.figure()
-	plt.plot(self.nt_list, self.delay_list)
+	plt.plot(nt_list, delay_list)
 	plt.title('Delay due to Doppler shift')
 	plt.xlabel("time (ns)")
 	plt.ylabel('delay (ns)')

@@ -1,75 +1,72 @@
 import sys
 import numpy as np
+import stampParser 
+import stampProcessor 
+import satParser 
+import dopplerProcessor
+import xcorrProcessor 
 from dopplerShift import DopplerShift
-
-from key import Key
 
 # load data
 filenameAlice = sys.argv[1]
 filenameBob = sys.argv[2]
 filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
-mode = sys.argv[5] # unshifted, firstDoppler, secondDoppler, or aliceBob
+mode = sys.argv[5] # unshifted, propagationDelay, clockDriftShift, or aliceBob
 
-tau = 100000
-# tau = 1000000
-f = 1e9
+tau = 1000
+coarseTau = 100000
 units = 1e-9
 clockOffset = 1000000
 clockDrift = 3e-3 #(2ms / s)
 
-key = Key(
-    filenameAlice,
-    filenameBob,
-    filenameTLE,
-    filenameSavedPass,
-    tau,
-    f,
-	units,
-	clockOffset,
-	clockDrift
+sat, loc, startTime = satParser.parseSatellite(filenameTLE, filenameSavedPass)
+timeStampAlice, detectorAlice = stampParser.parseStamp(filenameAlice)
+timeStampBob, detectorBob = stampParser.parseStamp(filenameBob)
+
+if (mode != 'unshifted'):
+	timeStampBob = stampProcessor.removeAnomalies(timeStampBob)
+
+timeStampAlice, timeStampBob = stampProcessor.setStart(
+	timeStampAlice, timeStampBob
 )
 
-# parse satellite info
-key.parseSatellite()
-
-# parse timestamps
-key.parseStamp()
-
-# process timestamps
-key.processStamps()
-
-if (mode == 'firstDoppler' or 'secondDoppler'):
+if (mode == 'propagationDelay' or 'clockDriftShift'):
 	# doppler
-	key.calcDoppler()
-	key.plotDoppler()
+	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
+		sat, loc, startTime, timeStampAlice, units
+	)
+	dopplerProcessor.plotDoppler(nt_list, delay_list, df_list)
 
 	dopplerShift = DopplerShift(
-		key.timeStampAlice,
+		timeStampAlice,
 		clockOffset,
 		clockDrift,
-		key.tau,
-		key.units,
-		key.nt_list,
-		key.delay_list,
-		key.df_list
+		tau,
+		units,
+		nt_list,
+		delay_list,
+		df_list
 	)
-	dopplerShift.firstOrderDopplerShift()
-	if (mode != 'firstDoppler'):
-		dopplerShift.secondOrderDopplerShift()
+	dopplerShift.propagationDelay()
+	if (mode != 'propagationDelay'):
+		dopplerShift.clockDriftShift()
 
 	aliceShifted = dopplerShift.shiftedTimeStamp
 
 # cross-correlation
 if (mode == 'unshifted'):
-	key.binStamps(key.timeStampAlice, key.timeStampAlice)
-elif (mode == 'firstDoppler' or 'secondDoppler'):
-	key.binStamps(key.timeStampAlice, aliceShifted)
+	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampAlice)
+elif (mode == 'propagationDelay' or 'clockDriftShift'):
+	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, aliceShifted)
 elif (mode == 'aliceBob'):
-	key.binStamps(key.timeStampAlice, key.timeStampBob)
+	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
 
-key.xcorr()
+zeroIdxCoarse, shiftCoarse, maxIdxCoarse, ccCoarse = xcorrProcessor.xcorr(
+	coarseTimebinAlice, coarseTimebinBob, coarseTau
+)
+
 
 # plot
-key.plotStamps(mode)
-key.plotXcorr(mode)
+stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
+xcorrProcessor.plotXcorr(ccCoarse, coarseTau, zeroIdxCoarse, mode)

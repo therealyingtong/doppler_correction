@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-
 
 class DopplerShift:
 
@@ -29,7 +27,7 @@ class DopplerShift:
 		self.delay_list = delay_list
 		self.df_list = df_list
 
-	def firstOrderDopplerShift(self):
+	def propagationDelay(self):
 		coeffs = np.polyfit(self.nt_list, self.delay_list, 2)
 		print('first order coeffs', coeffs)
 		self.shiftedTimeStamp = self.timeStamp.copy()
@@ -38,7 +36,7 @@ class DopplerShift:
 			t = self.shiftedTimeStamp[i]
 			self.shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2]) + self.clockOffset
 
-	def secondOrderDopplerShift(self):
+	def clockDriftShift(self):
 		coeffs = np.polyfit(
 			self.nt_list, self.df_list, 3
 		)
@@ -48,20 +46,6 @@ class DopplerShift:
 			drift = self.clockDrift
 			secondOrderShift = t*(drift + (coeffs[0]*t*t*t + coeffs[1]*t*t + coeffs[2]*t + coeffs[3]))
 			self.shiftedTimeStamp[i] = t + secondOrderShift
-			# print('t', t)
-			# print('drift', drift)
-			# print('t second order shift', secondOrderShift)
-	
-
-	# def secondOrderDopplerShift(self):
-	# 	coeffs = np.polyfit(
-	# 		[nt / self.tau for nt in self.nt_list], self.df_list, 3
-	# 	)
-	# 	print('second order coeffs', coeffs)
-	# 	for i in range(len(self.shiftedTimebin)):
-	# 		count = self.shiftedTimebin[i] 
-	# 		drift = self.clockDrift
-	# 		self.shiftedTimebin[i] = count*drift*(coeffs[0]*drift*drift*drift + coeffs[1]*drift*drift + coeffs[2]*drift + coeffs[3]) 
 
 	def offset(self):
 		self.shiftedTimeStamp = self.shiftedTimeStamp[self.clockOffset:].copy()
