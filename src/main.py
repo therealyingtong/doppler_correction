@@ -19,7 +19,7 @@ coarseTauRatio = 1000
 tau = coarseTau / coarseTauRatio #fine timebin size (in ns)
 units = 1e-9
 clockOffset = 1000000
-clockDrift = 2e-6 #(2us / s)
+clockDrift = 20e-6 #(20us / s)
 
 sat, loc, startTime = satParser.parseSatellite(filenameTLE, filenameSavedPass)
 timeStampAlice, detectorAlice = stampParser.parseStamp(filenameAlice)
@@ -53,9 +53,9 @@ print("=====================COARSE=====================")
 # cross-correlation
 if (mode == 'unshifted'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampAlice)
-if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, aliceShifted)
-if (mode == 'aliceBob'):
+elif (mode == 'aliceBob'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
 
 zeroIdxCoarse, shiftCoarse, maxIdxCoarse, ccCoarse = xcorrProcessor.xcorr(
@@ -74,15 +74,15 @@ print('maxIdx', maxIdx)
 lowerSubsetRatio = (coarseTauRatio - 1)/coarseTauRatio
 upperSubsetRatio = (coarseTauRatio + 1)/coarseTauRatio
 subsetTimeStampAlice = timeStampAlice[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
-subsetAliceShifted = aliceShifted[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
-subsetTimeStampBob = timeStampBob[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
 
 # cross-correlation
 if (mode == 'unshifted'):
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampAlice)
-if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+	subsetAliceShifted = aliceShifted[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetAliceShifted)
-if (mode == 'aliceBob'):
+elif (mode == 'aliceBob'):
+	subsetTimeStampBob = timeStampBob[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampBob)
 
 print('len(timebinAlice)', len(timebinAlice))

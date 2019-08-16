@@ -48,6 +48,11 @@ def timebin(tau, timeStamp1, timeStamp2):
 	timebinBob = timebinBob - np.mean(timebinBob)
 
 	def padFFT(arr1, arr2):
+		# # arr1 should be longer array
+		# if (len(arr1) < len(arr2)):
+		# 	copy = arr2.copy()
+		# 	arr2 = arr1.copy()
+		# 	arr1 = copy
 
 		def findNextPower2(number):
 			if number < 1:
@@ -58,7 +63,7 @@ def timebin(tau, timeStamp1, timeStamp2):
 					i = i*2
 				return i
 
-		nextPower2 = findNextPower2(max(len(arr1), len(arr1)))
+		nextPower2 = findNextPower2(max(len(arr1), len(arr2)))
 		diffLen1 = nextPower2 - len(arr1)
 		diffLen2 = nextPower2 - len(arr2)
 
