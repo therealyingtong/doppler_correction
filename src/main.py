@@ -14,9 +14,9 @@ filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
 mode = sys.argv[5] # unshifted, propagationDelay, clockDriftShift, or aliceBob
 
-coarseTau = 100000
+coarseTau = 100000 #coarse timebin size (in ns)
 coarseTauRatio = 1000
-tau = coarseTau / coarseTauRatio
+tau = coarseTau / coarseTauRatio #fine timebin size (in ns)
 units = 1e-9
 clockOffset = 1000000
 clockDrift = 2e-6 #(2us / s)
@@ -32,7 +32,7 @@ timeStampAlice, timeStampBob = stampProcessor.setStart(
 
 
 # doppler
-if (mode == 'propagationDelay' or 'clockDriftShift'):
+if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 
 	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
 		sat, loc, startTime, timeStampAlice, units
@@ -53,9 +53,9 @@ print("=====================COARSE=====================")
 # cross-correlation
 if (mode == 'unshifted'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampAlice)
-elif (mode == 'propagationDelay' or 'clockDriftShift'):
+if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, aliceShifted)
-elif (mode == 'aliceBob'):
+if (mode == 'aliceBob'):
 	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
 
 zeroIdxCoarse, shiftCoarse, maxIdxCoarse, ccCoarse = xcorrProcessor.xcorr(
@@ -80,9 +80,9 @@ subsetTimeStampBob = timeStampBob[int(lowerSubsetRatio*maxIdxCoarse) : int(upper
 # cross-correlation
 if (mode == 'unshifted'):
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampAlice)
-elif (mode == 'propagationDelay' or 'clockDriftShift'):
+if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetAliceShifted)
-elif (mode == 'aliceBob'):
+if (mode == 'aliceBob'):
 	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampBob)
 
 print('len(timebinAlice)', len(timebinAlice))
