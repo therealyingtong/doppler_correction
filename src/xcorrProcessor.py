@@ -41,6 +41,7 @@ def xcorr(x, y, tau):
 	)
 	np.save('../data/cc', cc)
 	offset = shift * tau
+	print('shift', shift)
 	print('offset', offset, 'ns')
 
 	max_idx = np.argmax(cc)
@@ -50,8 +51,15 @@ def xcorr(x, y, tau):
 def plotXcorr(cc, tau, zero_idx, title):
 	plt.figure()
 	max_idx = np.argmax(cc)
-	start_idx = int(max_idx - len(cc) / (tau /10))
+	
+	# start_idx = 0
+	# end_idx = len(cc)
+	start_idx = int(max_idx - len(cc) / (tau / 10))
 	end_idx = int(max_idx + len(cc) / (tau / 10))
+
+	print('xcorr start_idx', start_idx)
+	print('xcorr end_idx', end_idx)
+
 	length = end_idx - start_idx 
 	plt.plot(
 		zero_idx - np.linspace(start_idx, end_idx, length), 
