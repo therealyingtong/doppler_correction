@@ -12,7 +12,7 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 	v_list = [] # range rate of change 
 	t_list = [] # time
 	timeRange = (max(timeStamp) - min(timeStamp)) * units
-	print('timeRange', timeRange)
+	print('timeRange', timeRange, 's')
 	for i in range (int(timeRange) * 10):
 		d_time = ephem.Date(startTime + (ephem.second * i * 0.1))
 

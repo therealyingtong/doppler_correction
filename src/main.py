@@ -6,6 +6,7 @@ import satParser
 import dopplerProcessor
 import xcorrProcessor 
 import dopplerShift 
+import matplotlib.pyplot as plt
 
 # load data
 filenameAlice = sys.argv[1]
@@ -19,7 +20,7 @@ coarseTauRatio = 1000
 tau = coarseTau / coarseTauRatio #fine timebin size (in ns)
 units = 1e-9
 clockOffset = 1000000
-clockDrift = 20e-6 #(20us / s)
+clockDrift = 1e-6 #(1us / s)
 
 sat, loc, startTime = satParser.parseSatellite(filenameTLE, filenameSavedPass)
 timeStampAlice, detectorAlice = stampParser.parseStamp(filenameAlice)
@@ -30,65 +31,57 @@ timeStampAlice, timeStampBob = stampProcessor.setStart(
 	timeStampAlice, timeStampBob
 )
 
-
+if (mode == 'unshifted'):
+	timeStampBob = timeStampAlice
 # doppler
-if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 
 	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
 		sat, loc, startTime, timeStampAlice, units
 	)
 	dopplerProcessor.plotDoppler(nt_list, delay_list, df_list)
 
-	aliceShifted = dopplerShift.propagationDelay(
+	timeStampBob = dopplerShift.propagationDelay(
 		timeStampAlice, nt_list, delay_list, clockOffset
 	)
 
 	if (mode == 'clockDriftShift'):
-		aliceShifted = dopplerShift.clockDriftShift(
-			aliceShifted, nt_list, df_list, clockDrift
+		timeStampBob = dopplerShift.clockDriftShift(
+			timeStampBob, nt_list, df_list, clockDrift
 		)
 
-print("=====================COARSE=====================")
+print("=====================FFT=====================")
+# the coarse xcorr gives an estimate of the delay to
 
-# cross-correlation
-if (mode == 'unshifted'):
-	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampAlice)
-elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
-	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, aliceShifted)
-elif (mode == 'aliceBob'):
-	coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
+# coarse cross-correlation
+coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
 
-zeroIdxCoarse, shiftCoarse, maxIdxCoarse, ccCoarse = xcorrProcessor.xcorr(
+ccCoarse, padLengthAlice, padLengthBob = xcorrProcessor.xcorrFFT(
 	coarseTimebinAlice, coarseTimebinBob, coarseTau
 )
 
 # plot
-stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
-xcorrProcessor.plotXcorr(ccCoarse, coarseTau, zeroIdxCoarse, mode)
+# stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
+xcorrProcessor.plotXcorr(ccCoarse, coarseTau, mode)
 
 print("=====================FINE=====================")
+maxDelayCoarse = int(len(ccCoarse)/2) - 1 - np.argmax(ccCoarse) 
+maxDelay = int( maxDelayCoarse * coarseTau )
+print('maxDelay', maxDelay)
 
-maxIdx = maxIdxCoarse * coarseTauRatio
-print('maxIdx', maxIdx)
+plotRange = 10000000
+startIdx = maxDelay-plotRange
+endIdx = maxDelay+plotRange
+binNum = 0.002*plotRange + 1
 
-lowerSubsetRatio = (coarseTauRatio - 1)/coarseTauRatio
-upperSubsetRatio = (coarseTauRatio + 1)/coarseTauRatio
-subsetTimeStampAlice = timeStampAlice[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
+print('startIdx, endIdx', startIdx, endIdx)
 
-# cross-correlation
-if (mode == 'unshifted'):
-	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampAlice)
-elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
-	subsetAliceShifted = aliceShifted[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
-	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetAliceShifted)
-elif (mode == 'aliceBob'):
-	subsetTimeStampBob = timeStampBob[int(lowerSubsetRatio*maxIdxCoarse) : int(upperSubsetRatio* maxIdxCoarse)]
-	timebinAlice, timebinBob = stampProcessor.timebin(tau, subsetTimeStampAlice, subsetTimeStampBob)
+bins = np.linspace(startIdx, endIdx, binNum)
+binSize = (endIdx - startIdx)/binNum
+print('bin size (no. of points)', binSize )
 
-print('len(timebinAlice)', len(timebinAlice))
-print('len(timebinBob)', len(timebinBob))
+tau2 = binSize
 
-zeroIdx, shift, maxIdx, cc = xcorrProcessor.xcorr(
-	timebinAlice, timebinBob, tau
-)
-xcorrProcessor.plotXcorr(cc, tau, zeroIdx, mode)
+cc = xcorrProcessor.xcorr(timeStampAlice, timeStampBob, bins)
+fineMaxIdx = np.argmax(cc)
+xcorrProcessor.plotXcorr(cc, tau2, mode)

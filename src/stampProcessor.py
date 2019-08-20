@@ -15,6 +15,14 @@ def setStart(timeStampAlice, timeStampBob):
 	timeStampBob = timeStampBob - min(timeStampBob)
 	return timeStampAlice, timeStampBob
 
+def findIdxOfTimeStamp(time, timeStamp):
+	coeffs = np.polyfit(
+		np.linspace(0, len(timeStamp), len(timeStamp)), 
+		timeStamp,
+		1)
+	idx = (time - coeffs[1]) / coeffs[0]
+	return int(idx)
+
 def timebin(tau, timeStamp1, timeStamp2):
 
 	def bin(arr,t):
@@ -47,35 +55,7 @@ def timebin(tau, timeStamp1, timeStamp2):
 	timebinAlice = timebinAlice - np.mean(timebinAlice)
 	timebinBob = timebinBob - np.mean(timebinBob)
 
-	def padFFT(arr1, arr2):
-		# # arr1 should be longer array
-		# if (len(arr1) < len(arr2)):
-		# 	copy = arr2.copy()
-		# 	arr2 = arr1.copy()
-		# 	arr1 = copy
 
-		def findNextPower2(number):
-			if number < 1:
-				return 1
-			else:
-				i = 1
-				while i < number:
-					i = i*2
-				return i
-
-		nextPower2 = findNextPower2(max(len(arr1), len(arr2)))
-		diffLen1 = nextPower2 - len(arr1)
-		diffLen2 = nextPower2 - len(arr2)
-
-		arr1 = np.concatenate([np.zeros(int(np.floor(diffLen1/2))), arr1, np.zeros(int(np.ceil(diffLen1/2)))])
-		arr2 = np.concatenate([np.zeros(int(np.floor(diffLen2/2))), arr2, np.zeros(int(np.ceil(diffLen2/2)))])
-
-		return arr1, arr2
-
-	# # pad arrays to same size
-	timebinAlice, timebinBob = padFFT(
-		timebinAlice, timebinBob
-	)
 	timebinAlice = timebinAlice[10:]
 	timebinBob = timebinBob[10:]
 	return timebinAlice, timebinBob
