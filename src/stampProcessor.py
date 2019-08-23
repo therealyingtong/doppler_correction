@@ -23,21 +23,29 @@ def findIdxOfTimeStamp(time, timeStamp):
 	idx = (time - coeffs[1]) / coeffs[0]
 	return int(idx)
 
+def sortArrays(arr1, arr2):
+	if (len(arr1) > len(arr2)):
+		return arr2, arr1
+	else:
+		return arr1, arr2
+
 def timebin(tau, timeStamp1, timeStamp2):
 
 	def bin(arr,t):
-		counter =0
 		binnedArray = [0]
+		arrRange = max(arr) - min(arr)
+		maxBinIdx = int(np.ceil(arrRange / t))
+		arrIdx = 0
 
-		i = 0
-		while i < (len(arr)):
-			if arr[i]>=counter*t:
-				counter += 1
-				binnedArray.append(0)
-				continue
-			i+=1
-			binnedArray[-1]+=1
-		
+		for binIdx in range(maxBinIdx):
+			binLimit = (binIdx)*t
+			while (arr[arrIdx] <= binLimit):
+				binnedArray[binIdx - 1] += 1
+				arrIdx += 1
+			
+			binnedArray.append(0)
+			continue
+
 		return list(np.array(binnedArray))
 
 	print("starting to bin timestamps")
@@ -47,14 +55,13 @@ def timebin(tau, timeStamp1, timeStamp2):
 	print("starting to bin bob timestamps")
 	timebinBob = bin(timeStamp2, tau)
 
-	# trim leading and trailing zeros
-	timebinAlice = np.trim_zeros(timebinAlice)
-	timebinBob = np.trim_zeros(timebinBob) 
+	# # trim leading and trailing zeros
+	# timebinAlice = np.trim_zeros(timebinAlice)
+	# timebinBob = np.trim_zeros(timebinBob) 
 
 	# normalise timebins
 	timebinAlice = timebinAlice - np.mean(timebinAlice)
 	timebinBob = timebinBob - np.mean(timebinBob)
-
 
 	timebinAlice = timebinAlice[10:]
 	timebinBob = timebinBob[10:]

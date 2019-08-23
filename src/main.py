@@ -30,6 +30,7 @@ timeStampBob = stampProcessor.removeAnomalies(timeStampBob)
 timeStampAlice, timeStampBob = stampProcessor.setStart(
 	timeStampAlice, timeStampBob
 )
+print('len(timeStampAlice), len(timeStampBob)', len(timeStampAlice), len(timeStampBob))
 
 if (mode == 'unshifted'):
 	timeStampBob = timeStampAlice
@@ -56,32 +57,31 @@ print("=====================FFT=====================")
 # coarse cross-correlation
 coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
 
-ccCoarse, padLengthAlice, padLengthBob = xcorrProcessor.xcorrFFT(
+ccCoarse, coarseShift = xcorrProcessor.xcorrFFT(
 	coarseTimebinAlice, coarseTimebinBob, coarseTau
 )
 
 # plot
 # stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
-xcorrProcessor.plotXcorr(ccCoarse, coarseTau, mode)
+xcorrProcessor.plotXcorr(ccCoarse, coarseTau, 0, mode)
 
 print("=====================FINE=====================")
-maxDelayCoarse = int(len(ccCoarse)/2) - 1 - np.argmax(ccCoarse) 
-maxDelay = int( maxDelayCoarse * coarseTau )
-print('maxDelay', maxDelay)
+coarseDelay = int( coarseShift * coarseTau )
+print('coarseDelay', coarseDelay)
 
-plotRange = 10000000
-startIdx = maxDelay-plotRange
-endIdx = maxDelay+plotRange
-binNum = 0.002*plotRange + 1
+window = 10000
+startIdx = coarseDelay - window
+endIdx = coarseDelay + window
+binNum = 0.2*window 
+fineTau = (endIdx - startIdx)/binNum
+bins = np.linspace(startIdx, endIdx, binNum)
 
 print('startIdx, endIdx', startIdx, endIdx)
+print('bin size (ns)', fineTau )
 
-bins = np.linspace(startIdx, endIdx, binNum)
-binSize = (endIdx - startIdx)/binNum
-print('bin size (no. of points)', binSize )
-
-tau2 = binSize
-
-cc = xcorrProcessor.xcorr(timeStampAlice, timeStampBob, bins)
-fineMaxIdx = np.argmax(cc)
-xcorrProcessor.plotXcorr(cc, tau2, mode)
+ccFine, fineShift = xcorrProcessor.xcorr(timeStampAlice, timeStampBob, bins)
+ 
+print('np.argmax(cc) ', np.argmax(ccFine) )
+fineDelay = fineShift * fineTau + coarseDelay
+print('fineDelay', fineDelay)
+xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay/fineTau, mode)
