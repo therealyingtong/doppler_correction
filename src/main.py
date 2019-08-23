@@ -69,10 +69,10 @@ print("=====================FINE=====================")
 coarseDelay = int( coarseShift * coarseTau )
 print('coarseDelay', coarseDelay)
 
-window = 10000
+window = 1000000
 startIdx = coarseDelay - window
 endIdx = coarseDelay + window
-binNum = 0.2*window 
+binNum = 0.002*window 
 fineTau = (endIdx - startIdx)/binNum
 bins = np.linspace(startIdx, endIdx, binNum)
 
