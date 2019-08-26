@@ -15,9 +15,7 @@ filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
 mode = sys.argv[5] # unshifted, propagationDelay, clockDriftShift, or aliceBob
 
-coarseTau = 100000 #coarse timebin size (in ns)
-coarseTauRatio = 1000
-tau = coarseTau / coarseTauRatio #fine timebin size (in ns)
+coarseTau = 10000 #coarse timebin size (in ns)
 units = 1e-9
 clockOffset = 1000000
 clockDrift = 1e-6 #(1us / s)
@@ -30,7 +28,6 @@ timeStampBob = stampProcessor.removeAnomalies(timeStampBob)
 timeStampAlice, timeStampBob = stampProcessor.setStart(
 	timeStampAlice, timeStampBob
 )
-print('len(timeStampAlice), len(timeStampBob)', len(timeStampAlice), len(timeStampBob))
 
 if (mode == 'unshifted'):
 	timeStampBob = timeStampAlice
@@ -69,11 +66,11 @@ print("=====================FINE=====================")
 coarseDelay = int( coarseShift * coarseTau )
 print('coarseDelay', coarseDelay)
 
-window = 1000000
+window = 10000
 startIdx = coarseDelay - window
 endIdx = coarseDelay + window
-binNum = 0.002*window 
-fineTau = (endIdx - startIdx)/binNum
+binNum = window 
+fineTau = (endIdx - startIdx)/binNum #fine bin size
 bins = np.linspace(startIdx, endIdx, binNum)
 
 print('startIdx, endIdx', startIdx, endIdx)
@@ -84,4 +81,4 @@ ccFine, fineShift = xcorrProcessor.xcorr(timeStampAlice, timeStampBob, bins)
 print('np.argmax(cc) ', np.argmax(ccFine) )
 fineDelay = fineShift * fineTau + coarseDelay
 print('fineDelay', fineDelay)
-xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay/fineTau, mode)
+xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode)

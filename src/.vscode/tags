@@ -1,0 +1,67 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+arr1	../debug.py	/^arr1 = np.array(range(1,1001))$/;"	kind:variable	line:10
+arr2	../debug.py	/^arr2 = np.concatenate((arr2a,arr2b))$/;"	kind:variable	line:13
+arr2a	../debug.py	/^arr2a = np.array([])$/;"	kind:variable	line:11
+arr2b	../debug.py	/^arr2b = np.array(range(500,1001))$/;"	kind:variable	line:12
+bin	../stampProcessor.py	/^	def bin(arr,t):$/;"	kind:function	line:34
+binNum	../main.py	/^binNum = 2*window $/;"	kind:variable	line:73
+binSize	../debug.py	/^binSize = (upperIdx - lowerIdx) \/ numBins$/;"	kind:variable	line:17
+bins	../debug.py	/^bins = np.linspace(lowerIdx, upperIdx, numBins)$/;"	kind:variable	line:18
+bins	../main.py	/^bins = np.linspace(startIdx, endIdx, binNum)$/;"	kind:variable	line:75
+calcDoppler	../dopplerProcessor.py	/^def calcDoppler(sat, loc, startTime, timeStamp, units):$/;"	kind:function	line:7
+cc	../debug.py	/^cc = pyc.pcorrelate(arr2,arr1,bins)$/;"	kind:variable	line:19
+clockDrift	../main.py	/^clockDrift = 1e-6 #(1us \/ s)$/;"	kind:variable	line:21
+clockDriftShift	../dopplerShift.py	/^def clockDriftShift(timeStamp, nt_list, df_list, clockDrift):$/;"	kind:function	line:15
+clockOffset	../main.py	/^clockOffset = 1000000$/;"	kind:variable	line:20
+coarseDelay	../main.py	/^coarseDelay = int( coarseShift * coarseTau )$/;"	kind:variable	line:67
+coarseTau	../main.py	/^coarseTau = 10000 #coarse timebin size (in ns)$/;"	kind:variable	line:18
+compute_shift	../xcorrProcessor.py	/^	def compute_shift(x, y):$/;"	kind:function	line:46
+cross_correlation_using_fft	../xcorrProcessor.py	/^		def cross_correlation_using_fft(x, y, N):$/;"	kind:function	line:48
+debug.py	../debug.py	1;"	kind:file	line:1
+dopplerProcessor.py	../dopplerProcessor.py	1;"	kind:file	line:1
+dopplerShift.py	../dopplerShift.py	1;"	kind:file	line:1
+endIdx	../main.py	/^endIdx = coarseDelay + window$/;"	kind:variable	line:72
+filenameAlice	../main.py	/^filenameAlice = sys.argv[1]$/;"	kind:variable	line:12
+filenameBob	../main.py	/^filenameBob = sys.argv[2]$/;"	kind:variable	line:13
+filenameSavedPass	../main.py	/^filenameSavedPass = sys.argv[4]$/;"	kind:variable	line:15
+filenameTLE	../main.py	/^filenameTLE = sys.argv[3]$/;"	kind:variable	line:14
+findIdxOfTimeStamp	../stampProcessor.py	/^def findIdxOfTimeStamp(time, timeStamp):$/;"	kind:function	line:18
+findNextPower2	../xcorrProcessor.py	/^	def findNextPower2(number):$/;"	kind:function	line:37
+fineDelay	../main.py	/^fineDelay = fineShift * fineTau + coarseDelay$/;"	kind:variable	line:83
+fineTau	../main.py	/^fineTau = (endIdx - startIdx)\/binNum$/;"	kind:variable	line:74
+lowerIdx	../debug.py	/^lowerIdx = -1000$/;"	kind:variable	line:14
+main.py	../main.py	1;"	kind:file	line:1
+mode	../main.py	/^mode = sys.argv[5] # unshifted, propagationDelay, clockDriftShift, or aliceBob$/;"	kind:variable	line:16
+numBins	../debug.py	/^numBins = 500$/;"	kind:variable	line:16
+padToSameLength	../xcorrProcessor.py	/^	def padToSameLength(x, y):$/;"	kind:function	line:14
+parseSatellite	../satParser.py	/^def parseSatellite(filenameTLE, filenameSavedPass):$/;"	kind:function	line:3
+parseStamp	../stampParser.py	/^def parseStamp(filename):$/;"	kind:function	line:5
+plot	../stampProcessor.py	/^	def plot(data, xlabel, ylabel, title):$/;"	kind:function	line:72
+plotDoppler	../dopplerProcessor.py	/^def plotDoppler(nt_list, df_list, delay_list):$/;"	kind:function	line:46
+plotStamps	../stampProcessor.py	/^def plotStamps(timeStampAlice, timeStampBob, timebinAlice, timebinBob, title):$/;"	kind:function	line:70
+plotXcorr	../xcorrProcessor.py	/^def plotXcorr(cc, tau, zero_value, title):$/;"	kind:function	line:80
+propagationDelay	../dopplerShift.py	/^def propagationDelay(timeStamp, nt_list, delay_list, clockOffset):$/;"	kind:function	line:4
+removeAnomalies	../stampProcessor.py	/^def removeAnomalies(timeStampBob):$/;"	kind:function	line:4
+satParser.py	../satParser.py	1;"	kind:file	line:1
+setStart	../stampProcessor.py	/^def setStart(timeStampAlice, timeStampBob):$/;"	kind:function	line:11
+shift	../debug.py	/^shift = (np.argmax(cc) - int(numBins \/ 2) ) * binSize$/;"	kind:variable	line:25
+sortArrays	../stampProcessor.py	/^def sortArrays(arr1, arr2):$/;"	kind:function	line:26
+stampParser.py	../stampParser.py	1;"	kind:file	line:1
+stampProcessor.py	../stampProcessor.py	1;"	kind:file	line:1
+startIdx	../main.py	/^startIdx = coarseDelay - window$/;"	kind:variable	line:71
+timeStampBob	../main.py	/^		timeStampBob = dopplerShift.clockDriftShift($/;"	kind:variable	line:48
+timeStampBob	../main.py	/^	timeStampBob = dopplerShift.propagationDelay($/;"	kind:variable	line:43
+timeStampBob	../main.py	/^	timeStampBob = timeStampAlice$/;"	kind:variable	line:34
+timeStampBob	../main.py	/^timeStampBob = stampProcessor.removeAnomalies(timeStampBob)$/;"	kind:variable	line:26
+timebin	../stampProcessor.py	/^def timebin(tau, timeStamp1, timeStamp2):$/;"	kind:function	line:32
+units	../main.py	/^units = 1e-9$/;"	kind:variable	line:19
+upperIdx	../debug.py	/^upperIdx = 0$/;"	kind:variable	line:15
+window	../main.py	/^window = 10000$/;"	kind:variable	line:70
+xcorr	../xcorrProcessor.py	/^def xcorr(x, y, bins):$/;"	kind:function	line:12
+xcorrFFT	../xcorrProcessor.py	/^def xcorrFFT(x, y, tau):$/;"	kind:function	line:35
+xcorrProcessor.py	../xcorrProcessor.py	1;"	kind:file	line:1

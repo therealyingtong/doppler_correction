@@ -82,6 +82,8 @@ def plotXcorr(cc, tau, zero_value, title):
 	zero_idx = np.floor(len(cc)/2)
 	start_idx = np.argmax(cc) - 50 
 	end_idx = np.argmax(cc) + 50
+	# start_idx = 0
+	# end_idx = len(cc)
 
 	plt.plot(
 		zero_idx - np.array(range(len(cc)))[start_idx:end_idx] + zero_value,
@@ -95,35 +97,3 @@ def plotXcorr(cc, tau, zero_value, title):
 
 	plt.close()
 
-
-# def plotXcorr(cc, tau, title):
-
-# 	zero_idx = np.floor(len(cc) / 2) 
-
-# 	max_idx = np.argmax(cc) 
-
-# 	shift = zero_idx - max_idx 
-# 	print('shift', shift)
-
-# 	start_idx = 0
-# 	end_idx = len(cc)
-# 	# start_idx = int(max_idx -50)
-# 	# end_idx = int(max_idx + 50)
-
-# 	print('xcorr start_idx', start_idx)
-# 	print('xcorr end_idx', end_idx)
-
-# 	length = end_idx - start_idx 
-
-# 	plt.plot(cc)
-# 	# plt.plot(
-# 	# 	np.linspace(start_idx, end_idx - 1, length) - zero_idx, 
-# 	# 	cc[start_idx:start_idx + length], 
-# 	# 	'-sk', markersize = 5
-# 	# )
-# 	plt.xlabel("Delay (" + str(tau) + "ns)")
-# 	plt.ylabel("Coincidence detections")
-# 	plt.savefig("../paper/assets/"+title+"_cc.png", bbox_inches = 'tight')
-# 	print('plotted cc')
-
-# 	plt.close()
