@@ -69,7 +69,6 @@ def xcorrFFT(x, y, tau):
 	cc = compute_shift(
 		x, y
 	)
-	np.save('../data/cc', cc)
 
 	zero_idx = np.floor(len(cc)/2)
 	shift = zero_idx - np.argmax(cc)

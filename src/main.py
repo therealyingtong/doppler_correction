@@ -6,6 +6,7 @@ import satParser
 import dopplerProcessor
 import xcorrProcessor 
 import dopplerShift 
+import correction
 import matplotlib.pyplot as plt
 
 # load data
@@ -48,11 +49,15 @@ elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 			timeStampBob, nt_list, df_list, clockDrift
 		)
 
+np.save('../data/' + mode + 'TimeStampAlice', timeStampAlice)
+np.save('../data/' + mode + 'TimeStampBob', timeStampBob)
+
 print("=====================FFT=====================")
 # the coarse xcorr gives an estimate of the delay to
 
 # coarse cross-correlation
-coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
+coarseTimebinAlice = stampProcessor.timebin(coarseTau, timeStampAlice)
+coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampBob)
 
 ccCoarse, coarseShift = xcorrProcessor.xcorrFFT(
 	coarseTimebinAlice, coarseTimebinBob, coarseTau
@@ -69,7 +74,7 @@ print('coarseDelay', coarseDelay)
 window = 10000
 startIdx = coarseDelay - window
 endIdx = coarseDelay + window
-binNum = window 
+binNum = window / 4 # 8.0ns
 fineTau = (endIdx - startIdx)/binNum #fine bin size
 bins = np.linspace(startIdx, endIdx, binNum)
 
@@ -82,3 +87,4 @@ print('np.argmax(cc) ', np.argmax(ccFine) )
 fineDelay = fineShift * fineTau + coarseDelay
 print('fineDelay', fineDelay)
 xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode)
+

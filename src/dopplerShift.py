@@ -3,7 +3,7 @@ import numpy as np
 
 def propagationDelay(timeStamp, nt_list, delay_list, clockOffset):
 	coeffs = np.polyfit(nt_list, delay_list, 2)
-	print('first order coeffs', coeffs)
+	print('propagationDelay coeffs', coeffs)
 	shiftedTimeStamp = timeStamp.copy()
 
 	for i in range(len(timeStamp)):
@@ -16,7 +16,7 @@ def clockDriftShift(timeStamp, nt_list, df_list, clockDrift):
 	coeffs = np.polyfit(
 		nt_list, df_list, 3
 	)
-	print('second order coeffs', coeffs)
+	print('clockDriftShift coeffs', coeffs)
 	shiftedTimeStamp = timeStamp.copy()
 
 	for i in range(len(shiftedTimeStamp)):

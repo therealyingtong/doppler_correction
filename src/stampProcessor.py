@@ -29,7 +29,7 @@ def sortArrays(arr1, arr2):
 	else:
 		return arr1, arr2
 
-def timebin(tau, timeStamp1, timeStamp2):
+def timebin(tau, timeStamp):
 
 	def bin(arr,t):
 		binnedArray = [0]
@@ -39,7 +39,7 @@ def timebin(tau, timeStamp1, timeStamp2):
 
 		for binIdx in range(maxBinIdx):
 			binLimit = (binIdx)*t
-			while (arr[arrIdx] <= binLimit):
+			while (arr[arrIdx] < binLimit and arrIdx < len(arr)):
 				binnedArray[binIdx - 1] += 1
 				arrIdx += 1
 			
@@ -48,24 +48,13 @@ def timebin(tau, timeStamp1, timeStamp2):
 
 		return list(np.array(binnedArray))
 
-	print("starting to bin timestamps")
+	print("starting to bin timestamp")
+	timebin = bin(timeStamp, tau)
 
-	print("starting to bin alice timestamps")
-	timebinAlice = bin(timeStamp1, tau)
-	print("starting to bin bob timestamps")
-	timebinBob = bin(timeStamp2, tau)
+	timebin = timebin - np.mean(timebin)
 
-	# # trim leading and trailing zeros
-	# timebinAlice = np.trim_zeros(timebinAlice)
-	# timebinBob = np.trim_zeros(timebinBob) 
-
-	# normalise timebins
-	timebinAlice = timebinAlice - np.mean(timebinAlice)
-	timebinBob = timebinBob - np.mean(timebinBob)
-
-	timebinAlice = timebinAlice[10:]
-	timebinBob = timebinBob[10:]
-	return timebinAlice, timebinBob
+	timebin = timebin[10:]
+	return timebin
 
 def plotStamps(timeStampAlice, timeStampBob, timebinAlice, timebinBob, title):
 
