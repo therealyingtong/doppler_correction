@@ -7,9 +7,8 @@ coarseTau = 10000
 shift = -51318536.0
 # We define two sequences x, y as numpy array
 # where y is actually a sub-sequence from x
-timeStampAlice = np.load('../data/propagationDelayTimeStampAlice.npy')
-timeStampBob = np.load('../data/propagationDelayTimeStampBob.npy')
-
+timeStampAlice = np.load('../data/aliceBobtimeStampAlice.npy')
+timeStampBob = np.load('../data/aliceBobtimeStampBob.npy')
 coarseTimebinAlice = stampProcessor.timebin(coarseTau, timeStampAlice)
 coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampBob)
 

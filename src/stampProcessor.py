@@ -1,6 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+def removeBeacons(timeStamp, detector):
+	# print(detector[0:100])
+	for i in range(len(timeStamp) - 1):
+		if ((timeStamp[i] == timeStamp[i+1]) or (timeStamp[i] == timeStamp[i-1])):
+			print(
+				'index:', i,
+				'timestamp:', timeStamp[i], 
+				'detector:', detector[i]
+			)
+
 def removeAnomalies(timeStampBob):
 	print("removing anomalies from timestamps")
 	# manually remove anomalies in timeStampBob

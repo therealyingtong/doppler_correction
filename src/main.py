@@ -31,17 +31,19 @@ timeStampAlice, timeStampBob = stampProcessor.setStart(
 )
 
 if (mode == 'unshifted'):
+	# timeStampAlice = timeStampBob
 	timeStampBob = timeStampAlice
+
 # doppler
-elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 
 	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
-		sat, loc, startTime, timeStampAlice, units
+		sat, loc, startTime, timeStampBob, units
 	)
 	dopplerProcessor.plotDoppler(nt_list, delay_list, df_list)
 
-	timeStampBob = dopplerShift.propagationDelay(
-		timeStampAlice, nt_list, delay_list, clockOffset
+	timeStampBob, coeffs = dopplerShift.propagationDelay(
+		timeStampBob, nt_list, delay_list
 	)
 
 	if (mode == 'clockDriftShift'):
@@ -51,6 +53,9 @@ elif (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 
 np.save('../data/' + mode + 'TimeStampAlice', timeStampAlice)
 np.save('../data/' + mode + 'TimeStampBob', timeStampBob)
+
+print('len(timeStampAlice)', len(timeStampAlice))
+print('len(timeStampBob)', len(timeStampBob))
 
 print("=====================FFT=====================")
 # the coarse xcorr gives an estimate of the delay to

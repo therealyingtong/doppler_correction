@@ -19,7 +19,7 @@ def xcorr(x, y, bins):
 			x = np.concatenate([np.zeros(int(np.floor(diffLen/2))), x, np.zeros(int(np.ceil(diffLen/2)))])
 		return x, y
 
-	x,y = padToSameLength(x,y)
+	# x,y = padToSameLength(x,y)
 
 	print('starting xcorr')
 	print('len(x), len(y)',len(x), len(y))
@@ -90,7 +90,7 @@ def plotXcorr(cc, tau, zero_value, title):
 		'-sk', markersize = 5
 	)
 	plt.xlabel("Delay (" + str(tau) + "ns)")
-	plt.ylabel("Coincidence detections")
+	plt.ylabel("Cross-correlation")
 	plt.savefig("../paper/assets/"+title+"_cc.png", bbox_inches = 'tight')
 	print('plotted cc')
 

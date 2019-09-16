@@ -4,22 +4,22 @@ import xcorrProcessor
 import numpy as np
 import matplotlib.pyplot as plt
 
-mode = 'propagationDelayCorrection'
+mode = 'aliceBobCorrection'
 coarseTau = 10000
-shift = -51318536.0
-# timeStampAlice = np.load('../data/aliceBobtimeStampAlice.npy')
-# timeStampBob = np.load('../data/aliceBobtimeStampBob.npy')
+shift = -51319056.0
+timeStampAlice = np.load('../data/aliceBobtimeStampAlice.npy')
+timeStampBob = np.load('../data/aliceBobtimeStampBob.npy')
 
-# correctedTimeStampBob = correction.linearShift(timeStampBob, shift)
+correctedTimeStampBob = correction.linearShift(timeStampBob, shift)
 
-timeStampAlice = np.load('../data/propagationDelayTimeStampAlice.npy')
-timeStampBob = np.load('../data/propagationDelayTimeStampBob.npy')
+# timeStampAlice = np.load('../data/propagationDelayTimeStampAlice.npy')
+# timeStampBob = np.load('../data/propagationDelayTimeStampBob.npy')
 
-a = 1.16261386e-16
-b = -2.22268657e-06
-c = 2.24977492e+06
+# a = 1.16261386e-16
+# b = -2.22268657e-06
+# c = 2.24977492e+06
 
-correctedTimeStampBob = correction.quadShift(timeStampBob, a, b, c)
+correctedTimeStampBob = correction.quadShift(timeStampBob, 0, 0, shift)
 
 
 print("=====================FFT=====================")

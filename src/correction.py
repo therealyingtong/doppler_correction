@@ -1,8 +1,18 @@
 import numpy as np
+import dopplerProcessor
+import dopplerShiftAnsatz
 
-def linearShift(timeStamp, shift):
-	shifted = timeStamp - shift
-	return np.array(shifted)
+def coeffsAnsatz(sat, loc, startTime, timeStamp, units):
+
+	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
+		sat, loc, startTime, timeStamp, units
+	)
+	shiftedTimeStamp, coeffs = dopplerShiftAnsatz.propagationDelay(
+		timeStamp, nt_list, delay_list
+	)
+
+	return coeffs
+
 
 def quadShift(timeStamp, a, b, c):
 	shifted = timeStamp.copy()

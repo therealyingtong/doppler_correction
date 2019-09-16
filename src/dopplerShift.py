@@ -1,16 +1,15 @@
 import numpy as np
 
-
-def propagationDelay(timeStamp, nt_list, delay_list, clockOffset):
+def propagationDelay(timeStamp, nt_list, delay_list):
 	coeffs = np.polyfit(nt_list, delay_list, 2)
 	print('propagationDelay coeffs', coeffs)
 	shiftedTimeStamp = timeStamp.copy()
 
 	for i in range(len(timeStamp)):
 		t = shiftedTimeStamp[i]
-		shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2]) + clockOffset
+		shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2])
 
-	return shiftedTimeStamp
+	return shiftedTimeStamp, coeffs
 
 def clockDriftShift(timeStamp, nt_list, df_list, clockDrift):
 	coeffs = np.polyfit(
