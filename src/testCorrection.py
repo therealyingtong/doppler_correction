@@ -1,4 +1,5 @@
 import correction
+import satParser
 import stampProcessor
 import xcorrProcessor
 import numpy as np
@@ -7,10 +8,16 @@ import matplotlib.pyplot as plt
 mode = 'aliceBobCorrection'
 coarseTau = 10000
 shift = -51319056.0
+
 timeStampAlice = np.load('../data/aliceBobtimeStampAlice.npy')
 timeStampBob = np.load('../data/aliceBobtimeStampBob.npy')
 
+filenameTLE = '../data/GALASSIA-TLE.txt'
+filenameSavedPass = '../data/GALASSIA-15723-pass-48.txt'
+sat, loc, startTime = satParser.parseSatellite(filenameTLE, filenameSavedPass)
+
 correctedTimeStampBob = correction.linearShift(timeStampBob, shift)
+
 
 # timeStampAlice = np.load('../data/propagationDelayTimeStampAlice.npy')
 # timeStampBob = np.load('../data/propagationDelayTimeStampBob.npy')

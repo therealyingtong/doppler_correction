@@ -3,9 +3,9 @@ import numpy as np
 import stampParser 
 import stampProcessor 
 import satParser 
-import dopplerProcessor
 import xcorrProcessor 
 import dopplerShift 
+import dopplerShiftAnsatz
 import correction
 import matplotlib.pyplot as plt
 
@@ -37,18 +37,18 @@ if (mode == 'unshifted'):
 # doppler
 if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
 
-	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
+	delay_list, df_list = dopplerShift.calcDoppler(
 		sat, loc, startTime, timeStampBob, units
 	)
-	dopplerProcessor.plotDoppler(nt_list, delay_list, df_list)
+	dopplerShift.plotDoppler(timeStampBob, delay_list, df_list)
 
-	timeStampBob, coeffs = dopplerShift.propagationDelay(
-		timeStampBob, nt_list, delay_list
+	timeStampBob = dopplerShift.propagationDelay(
+		timeStampBob, delay_list
 	)
 
 	if (mode == 'clockDriftShift'):
 		timeStampBob = dopplerShift.clockDriftShift(
-			timeStampBob, nt_list, df_list, clockDrift
+			timeStampBob, df_list, clockDrift
 		)
 
 np.save('../data/' + mode + 'TimeStampAlice', timeStampAlice)

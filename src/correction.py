@@ -1,18 +1,30 @@
 import numpy as np
-import dopplerProcessor
 import dopplerShiftAnsatz
 
-def coeffsAnsatz(sat, loc, startTime, timeStamp, units):
+def ansatz(sat, loc, startTime, timeStamp, units):
 
-	nt_list, delay_list, df_list = dopplerProcessor.calcDoppler(
+	nt_list, delay_list, df_list = dopplerShiftAnsatz.calcDoppler(
 		sat, loc, startTime, timeStamp, units
 	)
 	shiftedTimeStamp, coeffs = dopplerShiftAnsatz.propagationDelay(
 		timeStamp, nt_list, delay_list
 	)
 
-	return coeffs
+	# nt_list, delay_list, df_list = dopplerShiftAnsatz.calcDoppler(
+	# 	sat, loc, startTime, timeStampBob, units
+	# )
+	# dopplerShiftAnsatz.plotDoppler(nt_list, delay_list, df_list)
 
+	# timeStampBob, coeffs = dopplerShiftAnsatz.propagationDelay(
+	# 	timeStampBob, nt_list, delay_list
+	# )
+
+	# if (mode == 'clockDriftShift'):
+	# 	timeStampBob, coeffs = dopplerShiftAnsatz.clockDriftShift(
+	# 		timeStampBob, nt_list, df_list, clockDrift
+	# 	)
+	
+	return shiftedTimeStamp, coeffs
 
 def quadShift(timeStamp, a, b, c):
 	shifted = timeStamp.copy()
