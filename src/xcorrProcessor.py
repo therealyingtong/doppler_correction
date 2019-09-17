@@ -4,22 +4,50 @@ from scipy.fftpack import fft, ifft, fftshift
 import matplotlib.pyplot as plt
 from numpy.lib.stride_tricks import as_strided
 import random
+import stampProcessor
 from scipy.linalg import toeplitz
 import pycorrelate as pyc
 
 import pyximport; pyximport.install()
 
-def xcorr(x, y, bins):
+def xcorr(timeStampAlice, timeStampBob, coarseTau, mode):
+	print("=====================FFT=====================")
+	# the coarse xcorr gives an estimate of the delay to
 
-	def padToSameLength(x, y):
-		diffLen = np.abs(len(x) - len(y))
-		if (len(x) > len(y)):
-			y = np.concatenate([np.zeros(int(np.floor(diffLen/2))), y, np.zeros(int(np.ceil(diffLen/2)))])
-		else:
-			x = np.concatenate([np.zeros(int(np.floor(diffLen/2))), x, np.zeros(int(np.ceil(diffLen/2)))])
-		return x, y
+	# coarse cross-correlation
+	coarseTimebinAlice = stampProcessor.timebin(coarseTau, timeStampAlice)
+	coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampBob)
 
-	# x,y = padToSameLength(x,y)
+	ccCoarse, coarseShift = xcorrFFT(
+		coarseTimebinAlice, coarseTimebinBob, coarseTau
+	)
+
+	# plot
+	# stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
+	plotXcorr(ccCoarse, coarseTau, 0, mode)
+
+	print("=====================FINE=====================")
+	coarseDelay = int( coarseShift * coarseTau )
+	print('coarseDelay', coarseDelay)
+
+	window = 10000
+	startIdx = coarseDelay - window
+	endIdx = coarseDelay + window
+	binNum = window / 4 # 8.0ns
+	fineTau = (endIdx - startIdx)/binNum #fine bin size
+	bins = np.linspace(startIdx, endIdx, binNum)
+
+	print('startIdx, endIdx', startIdx, endIdx)
+	print('bin size (ns)', fineTau )
+
+	ccFine, fineShift = xcorrFine(timeStampAlice, timeStampBob, bins)
+	
+	print('np.argmax(cc) ', np.argmax(ccFine) )
+	fineDelay = fineShift * fineTau + coarseDelay
+	print('fineDelay', fineDelay)
+	plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode)
+
+def xcorrFine(x, y, bins):
 
 	print('starting xcorr')
 	print('len(x), len(y)',len(x), len(y))

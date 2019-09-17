@@ -1,66 +1,62 @@
+import sys
 import correction
-import satParser
 import stampProcessor
 import xcorrProcessor
 import numpy as np
 import matplotlib.pyplot as plt
 
-mode = 'aliceBobCorrection'
+# load data
+filenameAlice = sys.argv[1]
+filenameBob = sys.argv[2]
+filenameTLE = sys.argv[3]
+filenameSavedPass = sys.argv[4]
+mode = sys.argv[5] # unshiftedGuess, propagationDelayGuess, clockDriftShiftGuess, or aliceBobGuess
+
+units = 1e-9
 coarseTau = 10000
-shift = -51319056.0
+sat, loc, startTime = stampProcessor.parseSatellite(filenameTLE, filenameSavedPass)
 
-timeStampAlice = np.load('../data/aliceBobtimeStampAlice.npy')
-timeStampBob = np.load('../data/aliceBobtimeStampBob.npy')
+timeStampAlice = np.load(filenameAlice)
+timeStampBob = np.load(filenameBob)
 
-filenameTLE = '../data/GALASSIA-TLE.txt'
-filenameSavedPass = '../data/GALASSIA-15723-pass-48.txt'
-sat, loc, startTime = satParser.parseSatellite(filenameTLE, filenameSavedPass)
-
-correctedTimeStampBob = correction.linearShift(timeStampBob, shift)
-
-
-# timeStampAlice = np.load('../data/propagationDelayTimeStampAlice.npy')
-# timeStampBob = np.load('../data/propagationDelayTimeStampBob.npy')
-
-# a = 1.16261386e-16
-# b = -2.22268657e-06
-# c = 2.24977492e+06
-
-correctedTimeStampBob = correction.quadShift(timeStampBob, 0, 0, shift)
-
+print("=========== doppler shift ansatz ============")
+timeStampBob, coeffsAnsatz = correction.ansatz(
+	sat, loc, startTime, timeStampBob, units
+	)
 
 print("=====================FFT=====================")
 # the coarse xcorr gives an estimate of the delay to
 
-## coarse cross-correlation
-# coarseTimebinAlice, coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampAlice, timeStampBob)
+# coarse cross-correlation
 coarseTimebinAlice = stampProcessor.timebin(coarseTau, timeStampAlice)
-coarseTimebinBob = stampProcessor.timebin(coarseTau, correctedTimeStampBob)
-
+coarseTimebinBob = stampProcessor.timebin(coarseTau, timeStampBob)
 
 ccCoarse, coarseShift = xcorrProcessor.xcorrFFT(
 	coarseTimebinAlice, coarseTimebinBob, coarseTau
 )
 
+# plot
+# stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
 xcorrProcessor.plotXcorr(ccCoarse, coarseTau, 0, mode)
 
 print("=====================FINE=====================")
 coarseDelay = int( coarseShift * coarseTau )
 print('coarseDelay', coarseDelay)
 
-window = 1000
+window = 10000
 startIdx = coarseDelay - window
 endIdx = coarseDelay + window
-binNum = window / 4 #8.0ns
+binNum = window / 4 # 8.0ns
 fineTau = (endIdx - startIdx)/binNum #fine bin size
 bins = np.linspace(startIdx, endIdx, binNum)
 
 print('startIdx, endIdx', startIdx, endIdx)
 print('bin size (ns)', fineTau )
 
-ccFine, fineShift = xcorrProcessor.xcorr(timeStampAlice, correctedTimeStampBob, bins)
+ccFine, fineShift = xcorrProcessor.xcorrFine(timeStampAlice, timeStampBob, bins)
  
 print('np.argmax(cc) ', np.argmax(ccFine) )
 fineDelay = fineShift * fineTau + coarseDelay
 print('fineDelay', fineDelay)
 xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode)
+

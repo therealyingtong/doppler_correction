@@ -1,5 +1,83 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import ephem
+import dopplerShift
+
+def process(
+	filenameTLE, 
+	filenameSavedPass, 
+	filenameAlice, 
+	filenameBob, 
+	mode,
+	units,
+	clockDrift):
+
+	sat, loc, startTime = parseSatellite(filenameTLE, filenameSavedPass)
+	timeStampAlice, detectorAlice = parseStamp(filenameAlice)
+	timeStampBob, detectorBob = parseStamp(filenameBob)
+	timeStampBob = removeAnomalies(timeStampBob)
+
+	timeStampAlice, timeStampBob = setStart(
+		timeStampAlice, timeStampBob
+	)
+
+	if (mode == 'unshifted'):
+		# timeStampAlice = timeStampBob
+		timeStampBob = timeStampAlice
+
+	# doppler
+	if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
+
+		delay_list, df_list = dopplerShift.calcDoppler(
+			sat, loc, startTime, timeStampBob, units
+		)
+		dopplerShift.plotDoppler(timeStampBob, delay_list, df_list)
+
+		timeStampBob = dopplerShift.propagationDelay(
+			timeStampBob, delay_list
+		)
+
+		if (mode == 'clockDriftShift'):
+			timeStampBob = dopplerShift.clockDriftShift(
+				timeStampBob, df_list, clockDrift
+			)
+
+	np.save('../data/' + mode + 'TimeStampAlice', timeStampAlice)
+	np.save('../data/' + mode + 'TimeStampBob', timeStampBob)
+
+	print('len(timeStampAlice)', len(timeStampAlice))
+	print('len(timeStampBob)', len(timeStampBob))
+
+	return timeStampAlice, timeStampBob
+
+def parseSatellite(filenameTLE, filenameSavedPass):
+
+	tleFile = open(filenameTLE, "r")
+	sat = ephem.readtle(
+		tleFile.readline(),
+		tleFile.readline(),
+		tleFile.readline()
+	)
+	tleFile.close()
+
+	loc = ephem.Observer()
+	savedPassFile = open(filenameSavedPass, "r")
+	loc.lat = float(savedPassFile.readline()) * ephem.degree
+	loc.lon = float(savedPassFile.readline()) * ephem.degree
+	loc.elevation = float(savedPassFile.readline()) 
+
+	startTime = ephem.Date(savedPassFile.readline()) + ephem.second * 75
+	savedPassFile.close()
+
+	return sat, loc, startTime
+
+def parseStamp(filename):
+    print("parsing "+ filename)
+    openedFile = open(filename, 'rb')
+    stamp = np.fromfile(file=openedFile, dtype='<u4').reshape(-1, 2)
+    timeStamp = ((np.uint64(stamp[:, 0]) << 17) + (stamp[:, 1] >> 15)) / 8. # time in nanoseconds.
+    detector = stamp[:, 1] & 0xf
+    return timeStamp, detector
 
 def removeBeacons(timeStamp, detector):
 	# print(detector[0:100])

@@ -34,7 +34,7 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 		df_list.append(df)
 
 	delay_list = [delay / units for delay in delay_list]
-	df_list = [df * 2e2 for df in df_list]
+	df_list = [df * 10 for df in df_list]
 
 	return delay_list, df_list
 

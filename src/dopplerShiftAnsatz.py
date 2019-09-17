@@ -13,8 +13,8 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 	t_list = [] # time
 	timeRange = (max(timeStamp) - min(timeStamp)) * units
 	print('timeRange', timeRange, 's')
-	for i in range (int(timeRange) * 10):
-		d_time = ephem.Date(startTime + (ephem.second * i * 0.1))
+	for i in range (int(timeRange) * int(1e3)):
+		d_time = ephem.Date(startTime + (ephem.second * i * 1e-3))
 
 		loc.date = d_time
 
@@ -42,31 +42,31 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 
 	return nt_list, delay_list, df_list
 
-def propagationDelay(timeStamp, nt_list, delay_list):
+def unshiftPropagationDelay(timeStamp, nt_list, delay_list):
 	coeffs = np.polyfit(nt_list, delay_list, 2)
 	print('propagationDelay coeffs', coeffs)
-	shiftedTimeStamp = timeStamp.copy()
+	unshiftedTimeStamp = timeStamp.copy()
 
 	for i in range(len(timeStamp)):
-		t = shiftedTimeStamp[i]
-		shiftedTimeStamp[i] =  t + (coeffs[0]*t*t + coeffs[1]*t + coeffs[2])
+		t = unshiftedTimeStamp[i]
+		unshiftedTimeStamp[i] =  t - (coeffs[0]*t*t + coeffs[1]*t + coeffs[2])
 
-	return shiftedTimeStamp, coeffs
+	return unshiftedTimeStamp, coeffs
 
-def clockDriftShift(timeStamp, nt_list, df_list, clockDrift):
+def unshiftClockDriftShift(timeStamp, nt_list, df_list, clockDrift):
 	coeffs = np.polyfit(
 		nt_list, df_list, 3
 	)
 	print('clockDriftShift coeffs', coeffs)
-	shiftedTimeStamp = timeStamp.copy()
+	unshiftedTimeStamp = timeStamp.copy()
 
-	for i in range(len(shiftedTimeStamp)):
-		t = shiftedTimeStamp[i] 
+	for i in range(len(unshiftedTimeStamp)):
+		t = unshiftedTimeStamp[i] 
 		drift = clockDrift
 		secondOrderShift = t*(drift + (coeffs[0]*t*t*t + coeffs[1]*t*t + coeffs[2]*t + coeffs[3]))
-		shiftedTimeStamp[i] = t + secondOrderShift
+		unshiftedTimeStamp[i] = t - secondOrderShift
 
-	return shiftedTimeStamp, coeffs
+	return unshiftedTimeStamp, coeffs
 
 def plotDoppler(nt_list, df_list, delay_list):
 
