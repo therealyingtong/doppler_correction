@@ -47,6 +47,8 @@ def xcorr(timeStampAlice, timeStampBob, coarseTau, mode):
 	print('fineDelay', fineDelay)
 	plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode)
 
+	return ccFine
+
 def xcorrFine(x, y, bins):
 
 	print('starting xcorr')

@@ -28,7 +28,7 @@ timeStampAlice, timeStampBob = stampProcessor.process(
 	clockDrift
 )
 
-xcorrProcessor.xcorr(
+ccFine = xcorrProcessor.xcorr(
 	timeStampAlice,
 	timeStampBob,
 	coarseTau,

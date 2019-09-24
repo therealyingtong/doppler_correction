@@ -127,7 +127,7 @@ def timebin(tau, timeStamp):
 
 		for binIdx in range(maxBinIdx):
 			binLimit = (binIdx)*t
-			while (arr[arrIdx] < binLimit and arrIdx < len(arr)):
+			while (arr[arrIdx] < binLimit - 1 and arrIdx < len(arr) - 1):
 				binnedArray[binIdx - 1] += 1
 				arrIdx += 1
 			
