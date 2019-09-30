@@ -42,29 +42,18 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 
 	return nt_list, delay_list, df_list
 
-def unshiftPropagationDelay(timeStamp, nt_list, delay_list):
-	coeffs = np.polyfit(nt_list, delay_list, 2)
+def unshiftPropagationDelay(timeStamp, nt_list, delay_list, deg):
+	coeffs = np.polyfit(nt_list, delay_list, deg)
 	print('propagationDelay coeffs', coeffs)
 	unshiftedTimeStamp = timeStamp.copy()
+	coeffs = np.flip(coeffs)
 
 	for i in range(len(timeStamp)):
 		t = unshiftedTimeStamp[i]
-		unshiftedTimeStamp[i] =  t - (coeffs[0]*t*t + coeffs[1]*t + coeffs[2])
-
-	return unshiftedTimeStamp, coeffs
-
-def unshiftClockDriftShift(timeStamp, nt_list, df_list, clockDrift):
-	coeffs = np.polyfit(
-		nt_list, df_list, 3
-	)
-	print('clockDriftShift coeffs', coeffs)
-	unshiftedTimeStamp = timeStamp.copy()
-
-	for i in range(len(unshiftedTimeStamp)):
-		t = unshiftedTimeStamp[i] 
-		drift = clockDrift
-		secondOrderShift = t*(drift + (coeffs[0]*t*t*t + coeffs[1]*t*t + coeffs[2]*t + coeffs[3]))
-		unshiftedTimeStamp[i] = t - secondOrderShift
+		shift = 0
+		for j in range(len(coeffs) - 1, -1, -1):
+			shift = shift + coeffs[j]*(t**j)
+		unshiftedTimeStamp[i] =  t - shift
 
 	return unshiftedTimeStamp, coeffs
 

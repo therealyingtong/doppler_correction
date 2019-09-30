@@ -5,27 +5,33 @@ import stampProcessor
 import matplotlib.pyplot as plt
 
 
-def ansatz(sat, loc, startTime, timeStamp, units):
+def ansatz(sat, loc, startTime, timeStamp, units, deg):
 
 	nt_list, delay_list, df_list = dopplerShiftAnsatz.calcDoppler(
 		sat, loc, startTime, timeStamp, units
 	)
 	unshiftedTimeStamp, coeffs = dopplerShiftAnsatz.unshiftPropagationDelay(
-		timeStamp, nt_list, delay_list
+		timeStamp, nt_list, delay_list, deg
 	)
 
 	return unshiftedTimeStamp, coeffs
 
-def quadUnshift(timeStamp, a, b, c):
+def unshift(timeStamp, coeffsArray):
 	unshifted = timeStamp.copy()
+	coeffsArray = np.flip(coeffsArray)
+
 	for i in range(len(unshifted)):
 		t = timeStamp[i]
-		unshifted[i] = t - (a*t*t + b*t+ c)
+		shift = 0
+		for j in range(len(coeffsArray) - 1, -1, -1):
+			shift = shift + coeffsArray[j]*(t**j)
+		unshifted[i] = t - shift
 	return unshifted
 
+
 def paramSearch(
-	rateA, rateB, epsilon,
-	a, b, c, 
+	ratesArray, epsilon,
+	coeffsArray, 
 	timeStampAlice, 
 	timeStampBob,
 	coarseTau,
@@ -33,11 +39,15 @@ def paramSearch(
 
 	print("============= starting param search ============")
 
-	c = 0 # disregard constant offset
+	coeffsArray[len(coeffsArray) - 1] = 0 # disregard constant offset
 
-	unshiftedTimeStampBob1 = quadUnshift(
-		timeStampBob, a, b, c
+	unshiftedTimeStampBob1 = unshift(
+		timeStampBob, coeffsArray
 	)
+	print('unshiftedTimeStampBob1', unshiftedTimeStampBob1)
+	plt.figure()
+	plt.plot(unshiftedTimeStampBob1)
+	plt.show()
 
 	print("=========== coarse FFT =============")
 	# coarse cross-correlation
@@ -68,11 +78,13 @@ def paramSearch(
 
 	print("=========== fine FFT 2 ================")
 
-	_a = a - 0.0001*a
-	_b = b - 0.0001*b
+	coeffsArray_ = coeffsArray.copy()
 
-	unshiftedTimeStampBob2 = quadUnshift(
-		timeStampBob, _a, _b, c
+	for i in range(len(coeffsArray_)):
+		coeffsArray_[i] = coeffsArray[i] + 0.0001 * coeffsArray[i]
+
+	unshiftedTimeStampBob2 = unshift(
+		timeStampBob, coeffsArray_
 	)
 
 	ccFine2, fineShift = xcorrProcessor.xcorrFine(timeStampAlice, unshiftedTimeStampBob2, bins)
@@ -90,20 +102,20 @@ def paramSearch(
 		print('================ iteration: ', iteration, '===============')
 
 		diff = gain2 - gain1
-		da = diff/(_a - a)
-		db = diff/(_b - b)
+		gradients = [None] * (len(coeffsArray) - 1)
 
-		a = _a
-		b = _b
+		for i in range(len(gradients)):
+			gradients[i] = diff / (coeffsArray_[i] - coeffsArray[i])
 
-		_a = a + rateA*da
-		_b = b + rateB*db
+		coeffsArray = coeffsArray_.copy()
 
-		print('change in a', _a - a)
-		print('change in b', _b - b)
+		for i in range(len(coeffsArray_)):
+			coeffsArray_[i] = coeffsArray_[i] + ratesArray[i]*gradients[i]
 
-		unshiftedTimeStampBob = quadUnshift(
-			timeStampBob, _a, _b, c
+		print('change in coeffs', coeffsArray_ - coeffsArray)
+
+		unshiftedTimeStampBob = unshift(
+			timeStampBob, coeffsArray_
 		)
 
 		gain1 = gain2
@@ -112,28 +124,28 @@ def paramSearch(
 		gain2 = spread(ccFine)
 		
 		inner = 0
-		while (gain2 < gain1):
-			print('gain2 - gain1', gain2 - gain1)
-			inner +=1 
-			print('--------------iteration', iteration, 'inner', inner, '-------------')
-			_a = a + rateA*da
-			_b = b + rateB*db/(2*inner)
+		# while (gain2 < gain1):
+		# 	print('gain2 - gain1', gain2 - gain1)
+		# 	inner +=1 
+		# 	print('--------------iteration', iteration, 'inner', inner, '-------------')
+		# 	_a = a + rateA*da
+		# 	_b = b + rateB*db/(2*inner)
 
-			unshiftedTimeStampBob = quadUnshift(
-				timeStampBob, _a, _b, c
-			)
+		# 	unshiftedTimeStampBob = unshift(
+		# 		timeStampBob, [_a, _b, c]
+		# 	)
 
-			ccFine, fineShift = xcorrProcessor.xcorrFine(timeStampAlice, unshiftedTimeStampBob, bins)
+		# 	ccFine, fineShift = xcorrProcessor.xcorrFine(timeStampAlice, unshiftedTimeStampBob, bins)
 
-			gain2 = spread(ccFine)
+		# 	gain2 = spread(ccFine)
 		
 
-		xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode+str(iteration))
+		# xcorrProcessor.plotXcorr(ccFine, fineTau, coarseDelay / fineTau, mode+str(iteration))
 
-		print('gain 1', gain1)
-		print('gain 2', gain2)
+		# print('gain 1', gain1)
+		# print('gain 2', gain2)
 
-	return a, b, c
+	return coeffsArray
 
 def spread(xcorr):
 	maxIdx = np.argmax(xcorr)

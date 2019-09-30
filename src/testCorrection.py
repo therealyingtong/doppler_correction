@@ -12,8 +12,11 @@ filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
 mode = sys.argv[5] # unshiftedGuess, propagationDelayGuess, clockDriftShiftGuess, or aliceBobGuess
 
-rateA = 5e-42 * 10
-rateB = 5e-20 * 10
+deg = 2
+rateA = 5e-50 * 10
+rateB = 5e-42 * 10
+rateC = 5e-20 * 10
+rates = [ rateB, rateC]
 epsilon = 0.000001
 units = 1e-9
 coarseTau = 10000
@@ -24,12 +27,13 @@ timeStampBob = np.load(filenameBob)
 
 print("=========== doppler shift ansatz ============")
 timeStampBobAnsatz, coeffsAnsatz = correction.ansatz(
-	sat, loc, startTime, timeStampBob, units
-	)
+	sat, loc, startTime, timeStampBob, units, deg
+)
 
-a, b, c = correction.paramSearch(
-	rateA, rateB, epsilon,
-	coeffsAnsatz[0], coeffsAnsatz[1], coeffsAnsatz[2],
+coeffs = correction.paramSearch(
+	rates, epsilon,
+	coeffsAnsatz,
 	timeStampAlice, timeStampBob, coarseTau, mode
 )
 
+print(coeffs)
