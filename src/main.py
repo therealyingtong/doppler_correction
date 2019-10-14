@@ -11,7 +11,8 @@ filenameAlice = sys.argv[1]
 filenameBob = sys.argv[2]
 filenameTLE = sys.argv[3]
 filenameSavedPass = sys.argv[4]
-mode = sys.argv[5] # unshifted, propagationDelay, clockDriftShift, or aliceBob
+timebinSize = int(sys.argv[5]) # in ns
+mode = sys.argv[6] # unshifted, propagationDelay, clockDriftShift, or aliceBob
 
 coarseTau = 10000 #coarse timebin size (in ns)
 units = 1e-9
@@ -32,5 +33,6 @@ ccFine = xcorrProcessor.xcorr(
 	timeStampAlice,
 	timeStampBob,
 	coarseTau,
+	timebinSize,
 	mode
 )

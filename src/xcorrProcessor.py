@@ -10,7 +10,7 @@ import pycorrelate as pyc
 
 import pyximport; pyximport.install()
 
-def xcorr(timeStampAlice, timeStampBob, coarseTau, mode):
+def xcorr(timeStampAlice, timeStampBob, coarseTau, timebinSize, mode):
 	print("=====================FFT=====================")
 	# the coarse xcorr gives an estimate of the delay to
 
@@ -33,7 +33,9 @@ def xcorr(timeStampAlice, timeStampBob, coarseTau, mode):
 	window = 10000
 	startIdx = coarseDelay - window
 	endIdx = coarseDelay + window
-	binNum = window / 4 # 8.0ns
+	binNum = window / (timebinSize / 2) 
+	# binNum = window / 4 # 8.0ns
+	# binNum = window / 8 # 16.0ns
 	fineTau = (endIdx - startIdx)/binNum #fine bin size
 	bins = np.linspace(startIdx, endIdx, binNum)
 

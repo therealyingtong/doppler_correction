@@ -46,13 +46,13 @@ def unshiftPropagationDelay(timeStamp, nt_list, delay_list, deg):
 	coeffs = np.polyfit(nt_list, delay_list, deg)
 	print('propagationDelay coeffs', coeffs)
 	unshiftedTimeStamp = timeStamp.copy()
-	coeffs = np.flip(coeffs)
+	coeffsFlipped = np.flip(coeffs)
 
 	for i in range(len(timeStamp)):
 		t = unshiftedTimeStamp[i]
 		shift = 0
-		for j in range(len(coeffs) - 1, -1, -1):
-			shift = shift + coeffs[j]*(t**j)
+		for j in range(len(coeffsFlipped) - 1, -1, -1):
+			shift = shift + coeffsFlipped[j]*(t**j)
 		unshiftedTimeStamp[i] =  t - shift
 
 	return unshiftedTimeStamp, coeffs
