@@ -1,37 +1,30 @@
 \section{Correction using timing beacon on satellite}
-The timing beacon correction method installs a beacon with regular pulses on the satellite. We time-stamp the beacon signal both on the satellite and at the ground station (Fig \ref{fig:beacon}). If we find the cross correlation between the beacon pulses registered on the satellite timestamp and those registered on the ground station, we can apply the same transformation to the idler and signal photoevents. We find that even a high jitter beacon with poor detection efficiency is sufficient to correct for all clock drifts including the change of the Doppler shift for high elevation angles.
 
 \begin{figure}[ht!]
-	\includegraphics[width=0.97\linewidth]{assets/beacon}
-	\caption{The time-stamping units and beacon generator use the same clock reference.}
-	\label{fig:beacon}
+	\begin{minipage}{.4\textwidth}
+		The timing beacon correction method installs a beacon with regular pulses on the satellite. We time-stamp the beacon signal both on the satellite and at the ground station (Fig \ref{fig:beacon}). By introducing structure, we can warp the time-stamps until the beacon pulses match up, and then apply the same transformation to the idler and signal photoevents.
+		
+	\end{minipage}
+	\begin{minipage}{.6\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{assets/beacon}
+		\caption{The beacon setup.}
+		\label{fig:beacon}
+	\end{minipage}%
+
 \end{figure}
 
-\subsection{Experimental setup}
-\texttt{TODO: describe atomic clock tabletop demo setup}
+
+The higher order correction calculates the clock drift for each point and uses a second order polynomial fit to determine the clock drift at each point. For the case of 90 degrees elevation, this is shown below:
 
 \begin{figure}[ht!]
 	\centering
-	\begin{subfigure}[t]{0.49\linewidth}
-		\centering
-		\includegraphics[height=4cm]{assets/aliceBobTimebinAlice.png}
-		\subcaption{}
-	\end{subfigure}
-	\begin{subfigure}[t]{0.49\textwidth}
-		\centering
-		\includegraphics[height=4cm]{assets/aliceBobTimebinBob.png}
-		\subcaption{}
-	\end{subfigure}
-	\caption{Timebins of 10000ns on (a) Alice tabletop atomic clock, (b) Bob tabletop atomic clock}
-	\label{fig:timebins}
+	\includegraphics[width=0.7\linewidth]{assets/beacon_alex}
+	\caption{Estimation of the second-order correction at each point.}
+	\label{fig:beacon_alex}
 \end{figure}
 
-\begin{figure}[ht!]
-	\includegraphics[width=0.97\linewidth]{assets/aliceBob_cc}
-	\caption{Cross-correlation on Fig \ref{fig:timebins}.}
-	\label{fig:cc_bin}
-\end{figure}
+We find that even a high jitter beacon with poor detection efficiency is sufficient to correct for all clock drifts including the change of the Doppler shift for high elevation angles.
 
-\subsection{Cross-correlation using FFT}
+However, the beacon introduces additional requirement into the satellite's payload. By using information from the TLE and methods like gradient ascent, we can recover the shift without the additional structure of beacon pulses.
 
-The second-order correlation function $g^{(2)}(\tau)$ is the intensity analogue of the first-order correlation function $g^{(1)}(\tau)$ that determines the visibility of interference fringes. $g^{(1)}(\tau)$ quantifies the way in which the electric field fluctuates in time, whereas $g^{(2)}(\tau)$ quantifies the intensity fluctuations.

@@ -44,7 +44,8 @@ def propagationDelay(timeStamp, delay_list):
 
 	for i in range(len(timeStamp)):
 		shiftedTimeStamp[i] = timeStamp[i] + delay_list[i]
-
+		# print('shiftedTimeStamp[i], timeStamp[i], delay_list[i]',
+		# shiftedTimeStamp[i], timeStamp[i], delay_list[i])
 	return shiftedTimeStamp
 
 def clockDriftShift(timeStamp, df_list, clockDrift):
@@ -65,7 +66,7 @@ def plotDoppler(timeStamp, df_list, delay_list):
 
 	plt.figure()
 	plt.plot(timeStamp, df_list)
-	plt.title('Second order Doppler shift')
+	# plt.title('Second order Doppler shift')
 	plt.xlabel("time (ns)")
 	plt.ylabel('second order Doppler shift')
 	plt.savefig("../paper/assets/range_velocity.png") 
@@ -74,7 +75,7 @@ def plotDoppler(timeStamp, df_list, delay_list):
 	print("plotting Doppler delay")
 	plt.figure()
 	plt.plot(timeStamp, delay_list)
-	plt.title('Delay due to Doppler shift')
+	# plt.title('Delay due to Doppler shift')
 	plt.xlabel("time (ns)")
 	plt.ylabel('delay (ns)')
 	plt.savefig("../paper/assets/delay.png") 

@@ -24,7 +24,7 @@ def xcorr(timeStampAlice, timeStampBob, coarseTau, timebinSize, mode):
 
 	# plot
 	# stampProcessor.plotStamps(timeStampAlice, timeStampBob, coarseTimebinAlice, coarseTimebinBob, mode)
-	plotXcorr(ccCoarse, coarseTau, 0, mode)
+	plotXcorr(ccCoarse, coarseTau, 0, mode+'Coarse')
 
 	print("=====================FINE=====================")
 	coarseDelay = int( coarseShift * coarseTau )

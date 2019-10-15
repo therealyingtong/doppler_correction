@@ -13,8 +13,11 @@ def calcDoppler(sat, loc, startTime, timeStamp, units):
 	t_list = [] # time
 	timeRange = (max(timeStamp) - min(timeStamp)) * units
 	print('timeRange', timeRange, 's')
-	for i in range (int(timeRange) * int(1e3)):
-		d_time = ephem.Date(startTime + (ephem.second * i * 1e-3))
+	# for i in range (int(timeRange) * int(1e3)):
+	for i in range (int(timeRange) * int(1e5)):
+
+		# d_time = ephem.Date(startTime + (ephem.second * i * 1e-3))
+		d_time = ephem.Date(startTime + (ephem.second * i * 1e-5))
 
 		loc.date = d_time
 

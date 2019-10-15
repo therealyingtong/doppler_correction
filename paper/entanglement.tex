@@ -1,43 +1,113 @@
 \section{Correction with entanglement}
 
+\subsection{Experimental setup}
+We begin with timestamps from a tabletop experiment, where Alice transmits photons to Bob. There is no Doppler shift here, but Bob's signal picks up some noise and losses.
+
 \begin{figure}[ht!]
 	\centering
 	\begin{subfigure}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[height=4cm]{assets/unshifted_cc.png}
+		\includegraphics[height=4cm]{assets/aliceBobTimebinAlice.png}
 		\subcaption{}
 	\end{subfigure}
 	\begin{subfigure}[t]{0.49\textwidth}
 		\centering
-		\includegraphics[height=4cm]{assets/firstDoppler_cc.png}
+		\includegraphics[height=4cm]{assets/aliceBobTimebinBob.png}
 		\subcaption{}
 	\end{subfigure}
-	\caption{Autocorrelation of signal with (a) no shift (b) propagation delay}
-	\label{fig:firstDoppler_cc}
+	\caption{Timebins of 10000ns on (a) Alice tabletop atomic clock, (b) Bob tabletop atomic clock}
+	\label{fig:timebins}
 \end{figure}
+
+To efficiently perform cross-correlation on two-million point dataset, we first use the Fast Fourier Transform with coarse timebins of 10000ns (Fig \ref{fig:FFT}(a)). Having identified a coarse peak, we then zoom in on a window around it and repeat the process with finer timebins (Fig \ref{fig:FFT}(b)). Since the resolution of the timestamps is 2.0ns, we decided on a timebin size of 8.0ns would be precise enough to be useful, yet still robust enough against statistical noise.
+
 \begin{figure}[ht!]
 	\centering
-	\includegraphics[width=0.95\linewidth]{assets/secondDoppler_cc.png}
-	\caption{Autocorrelation of signal with delay and Doppler shift}
-	\label{fig:secondDoppler_cc}
+	\begin{subfigure}[t]{0.48\linewidth}
+		\centering
+		\includegraphics[width=0.97\linewidth]{assets/aliceBobCoarse_cc}
+		\subcaption{}
+		\label{fig:cc_bin}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.5\textwidth}
+		\centering
+		\includegraphics[height=4cm]{assets/aliceBob_cc.png}
+		\subcaption{}
+	\end{subfigure}
+	\caption{Cross-correlation of Alice's and Bob's timestamps, using (a) coarse timebins and FFT, followed by (b) fine timebins with \texttt{pycorrelate}.}
+	\label{fig:FFT}
 \end{figure}
 
-\subsection{Ambiguity function}
-The two-dimensional ambiguity function is commonly used in radar signal  analysis as the most complete statement of the waveform's inherent performance. It reveals the range-Doppler position of ambiguous responses and defines the range and Doppler resolution. It is defined as 
+\subsection{Artificial Doppler shift}
+We introduce an artificial Doppler shift on Bob's timestamps. This is done by setting the timestamp to be in a time range for a satellite pass, and calculating the real Doppler shift for each timestamp. We used the \texttt{GALASSIA} satellite (Fig. \ref{fig:TLE}) and the \texttt{pyephem} package for this. 
 
-\begin{equation}
-A(\nu,\tau)\equiv\int_{-\infty}^{\infty}\tilde{s}\big(t+\frac{\tau}{2}\big)\tilde{s}^*\big(t-\frac{\tau}{2}\big)e^{2i\pi\nu t} dt
-\end{equation}
+\begin{figure}[ht!]
+\begin{tabular}{ l }
+\texttt{GALASSIA }\\
+\texttt{1 41170U 15077E   18291.47886069  .00002035  00000-0  73075-4 0  9998 }\\
+\texttt{2 41170  14.9881 191.7979 0013088 334.9563  25.0122 15.13422614157130}\\
+\texttt{Latitude, longitude, elevation: 1.2954752$^o$, 103.7800079$^o$, 100$^o$ }\\
+\texttt{Time and date: 2018/10/19 04:57:11}
 
-\subsection{Beat function}
-In this case, a radio signal transmitted at a nominal frequency off0from a satellite in motion will appear at the receiver with aslightly different frequency offR.  This is significant because the amount of shift from thenominal frequency is mathematically related to the relative change in position of the satelliteover time.There are two methods by which GPS receivers typically measure this effect.  The firstand most common method arises simply from the way in which a GPS receiver maintainsits  satellite  locks.   It  has  been  shown  that  satellite  locks  are  achieved  by  maximizing  anautocorrelation  function  between  the  received  PRN  code  on  the  L1  signal  and  the  samelocally generated code shifted through time.  It is apparent that the autocorrelation functionmust be maximized by aligning the received and generated code sequences over a significantamount of time (at least one full code cycle).  This is only possible if the code being generatedhas the same frequency as the code being received.When  a  receiver  is  carrying  out  its  search-and-acquire  procedure  for  the  various  PRNcodes,  it  must  try  to  align  the  codes  not  only  in  time,  but  also  in  frequency.   As  such,most receivers will scale the generated code according to a set of frequency bins centeredaround the nominal L1 frequency [42].  Upon finding a frequency value (and alignment) thatresults in a successful autocorrelation, the frequency can then be fine-tuned to maximize theautocorrelation result.  The exact frequency that does so should be equal to the frequencyof  the  received  signal.   As  such,  the  instantaneous  Doppler  shift  can  be  found  by  simplysubtracting the nominal frequency from the received frequency:fD=fR−f0.14
+\end{tabular}
+\caption{GALASSIA TLE and saved pass}
+\label{fig:TLE}
+\end{figure}
 
-It should be noted that the satellites and receivers are not moving relative to one anotherin a constant fashion; therefore, the Doppler shifts change over time.  The receiver is con-stantly tracking this shift to maintain its satellite lock, with the result that every Dopplerobservation is aninstantaneousobservation that changes with each consecutive epoch.The second method by which a receiver might calculate the Doppler shift to a satelliteis by determining thebeat frequencyresulting from mixing the received GPS signal with thelocally-generated one [5].  When two sine waves with slightly different frequencies are mixedtogether, a wave is produced with two frequency components equal to the sum and differenceof the original waves’ frequencies.  Knowing thatf≡dφ(t)dt, this can be written as:S1(t)⊗S2(t) =A1sin2πφ1(t)×A2sin2πφ2(t)=A1A22[cos2π(φ2(t)−φ1(t))−cos2π(φ2(t) +φ1(t))](3)By passing this resulting wave through a low-pass filter to remove the high-frequency com-ponent,  a  pure  sine  wave  containing  only  the  beat  frequency  (i.e.   the  Doppler  shift)  willremain:SB(t) =Bsin2πφB(t)(4)whereBis  the  amplitude  of  the  resulting  beat  signal  andφB(t)  is  the  resulting  phasedifference which changes as a function of time (a.k.a.  the beat frequency).  Once the Dopplershift  is  known,  it  can  be  used  to  determine  user  velocity,  signal  anomalies,  or  even  userposition with the aid of additional observables
+\noindent As expected, the Doppler shift introduces an approximately quadratic delay on the timestamps (Fig. \ref{fig:real_shift}(a)), and it is happening at the steepest rate (\ref{fig:real_shift}(b)). After being shifted, the cross-correlation peak spreads out over several timebins (\ref{fig:real_shift}(c)) and has to be corrected to recover a sharp peak (\ref{fig:real_shift}(d)).
 
-\texttt{TODO: fill in machine learning method}
+\begin{figure}[ht!]
+	\centering
+	\begin{subfigure}[t]{0.49\linewidth}
+		\centering
+		\includegraphics[height=4cm]{assets/delay.png}
+		\subcaption{}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.49\textwidth}
+		\centering
+		\includegraphics[height=4cm]{assets/range_velocity.png}
+		\subcaption{}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.49\linewidth}
+		\centering
+		\includegraphics[height=4cm]{assets/propagationDelay_cc.png}
+		\subcaption{}
+	\end{subfigure}
+	\begin{subfigure}[t]{0.49\textwidth}
+		\centering
+		\includegraphics[height=4cm]{assets/propagationDelayGuess_cc.png}
+		\subcaption{}
+	\end{subfigure}
+	\caption{(a) Introduced Doppler shift on each timestamp for the chosen satellite, and (b) rate of change of Doppler shift. (cf. Fig. \ref{fig:doppler_shift}). Cross-correlation of signals with (c) propagation delay and (d) after correction and gradient ascent.}
+	\label{fig:real_shift}
+\end{figure}
+
+\subsection{Gradient ascent on Doppler shift}
+
+To recover Fig \ref{fig:real_shift}(d) from Fig \ref{fig:real_shift}(c), we use gradient ascent on a guessed Doppler shift function. Our gradient ascent method is as follows:
 
 \begin{enumerate}
-	\item find middle part with no shift
-	\item try to shift middle part and find differential equation (order 2)
+
+	\item Using TLE data and the time range of the satellite pass, guess a Doppler shift as a polynomial function (e.g. quadratic):
+	\begin{equation}
+		f(x) = ax^2 + bx + c.
+	\end{equation}
+	Note that we cannot now replicate the exact artificial shift we had put in earlier, since we should not have access to Bob's unshifted timestamps. The point is therefore to recreate the shift as closely as possible using a polynomial fit.
+	\item Apply $f(x)$ to Bob's (shifted) timestamps, and perform cross-correlation with Alice's timestamps. 
+	\item Define a gain function: here, we want to maximise the total distance between the cross-correlation peak and its adjacent points, i.e. get as sharp a peak as possible: 
+	\begin{equation}
+		g = 2*\texttt{max(xcorr)} - \texttt{xcorr[maxIdx - 1]} - \texttt{xcorr[maxIdx + 1]}.
+	\end{equation}
+	This is always positive by definition. We can also normalise the gain function $g' = g / \texttt{max(xcorr)}$. We expect a perfect cross-correlation to have $g' = 2.0,$ with a peak at one point and zero at all others.
+	\item Use gradient ascent to update the polynomial coefficients, and maximise the sharpness of the cross-correlation peak:
+	\begin{align*}
+		a_i &= a_{i-1} + \alpha*\Delta_{a_{i-1}}\\
+		b_i &= b_{i-1} + \beta*\Delta_{b_{i-1}},
+	\end{align*} 
+	where $\alpha, \beta$ are learning rates, and $\Delta_{a_i} = \frac{g_i - g_{i-1}}{a_i - a_{i-1}}, \Delta_{b_i} = \frac{g_i - g_{i-1}}{b_i - b_{i-1}}$ are the gradients which define the direction of the next step. This method treats each coefficient as independent of the others.
+	
+	For the initial iteration, where there is no previous set of parameters, we use a manual offset to kickstart the ascent. Note also that we ignore the constant offset, since the point of the cross-correlation is to capture that very delay.
+	\item Repeat until the gradient ascent no longer improves the result ($g_i < g_{i-1}$). In cases where the learning rate is too low, and our result improves at an ever-slowing rate, we define an $\epsilon$ to terminate the ascent below a certain rate (\texttt{STOP if} $g_i - g_{i-1} < \epsilon$).
+	
 \end{enumerate}
  

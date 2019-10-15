@@ -27,11 +27,11 @@ def process(
 
 	# doppler
 	if (mode == 'propagationDelay' or mode == 'clockDriftShift'):
-
 		delay_list, df_list = dopplerShift.calcDoppler(
 			sat, loc, startTime, timeStampBob, units
 		)
-		dopplerShift.plotDoppler(timeStampBob, delay_list, df_list)
+		# print(delay_list[0:100])
+		dopplerShift.plotDoppler(timeStampBob, df_list, delay_list)
 
 		timeStampBob = dopplerShift.propagationDelay(
 			timeStampBob, delay_list

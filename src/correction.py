@@ -13,6 +13,7 @@ def ansatz(sat, loc, startTime, timeStamp, units, deg):
 	unshiftedTimeStamp, coeffs = dopplerShiftAnsatz.unshiftPropagationDelay(
 		timeStamp, nt_list, delay_list, deg
 	)
+	np.save('../data/ansatz', unshiftedTimeStamp)
 
 	return unshiftedTimeStamp, coeffs
 
@@ -38,6 +39,9 @@ def paramSearch(
 	coarseTau,
 	timebinSize,
 	mode):
+
+	gain = []
+	coeffs = []
 
 	print("============= starting param search ============")
 
@@ -111,11 +115,16 @@ def paramSearch(
 	print ("========= start iterations =========")
 
 	print('gain 1', gain1)
+	gain.append(gain1)
+	coeffs.append(coeffsArray)
 	print('gain 2', gain2)
 
 	ccFine = None
 	iteration = 0
 	while (gain2 - gain1 > epsilon):
+
+		gain.append(gain2)
+		coeffs.append(coeffsArray_)
 	
 		iteration += 1
 		print('================ iteration: ', iteration, '===============')
@@ -150,10 +159,7 @@ def paramSearch(
 		print('gain 1', gain1)
 		print('gain 2', gain2)
 
-	return coeffsArray
-
-def hyperparamSearch():
-	return rate
+	return coeffsArray, gain, coeffs
 
 def spread(xcorr):
 	maxIdx = np.argmax(xcorr)
